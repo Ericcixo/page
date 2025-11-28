@@ -1,14 +1,7 @@
 (function(){
   'use strict';
   
-  // --- PARALLAX ---
-  document.addEventListener('mousemove', function(e) {
-    const x = e.clientX; const y = e.clientY;
-    document.body.style.setProperty('--mouse-x', x + 'px');
-    document.body.style.setProperty('--mouse-y', y + 'px');
-  });
-
-  // --- THEME ---
+  // --- THEME TOGGLE ---
   const themeBtn = document.querySelector('#themeToggle');
   const themeIcon = document.querySelector('#themeIcon');
   const html = document.documentElement;
@@ -18,10 +11,17 @@
     localStorage.setItem('rf_theme', theme);
     if(themeIcon) themeIcon.textContent = theme === 'dark' ? '🌙' : '☀️';
   }
-  setTheme(localStorage.getItem('rf_theme') || 'dark');
-  if(themeBtn) themeBtn.addEventListener('click', () => setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
 
-  // --- CONFIG ---
+  const savedTheme = localStorage.getItem('rf_theme') || 'dark';
+  setTheme(savedTheme);
+
+  if(themeBtn) {
+    themeBtn.addEventListener('click', () => {
+      setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+  }
+
+  // --- CONFIGURACIÓN & ESTADO ---
   window.RF = window.RF || {};
   if(!window.CONFIG){ window.CONFIG = { pricing:{ providerUnit:2, bundles:{'4':6}, courseUnit:1, currency:'€' }, paypal:{ currency:'EUR' } }; }
   
@@ -32,7 +32,7 @@
   let cart = getCart();
   function saveCart(){ localStorage.setItem('rf_cart', JSON.stringify(cart)); updateUI(); }
   
-  // --- TOTALS ---
+  // --- LÓGICA DE PRECIOS ---
   function getTotals(){
     const uniqueP = [...new Set(cart.providers)];
     const pCount = uniqueP.length;
@@ -53,7 +53,7 @@
   
   function formatMoney(n){ return n.toFixed(2).replace('.', ',') + '€'; }
 
-  // --- UI ---
+  // --- UI UPDATES ---
   function updateUI(){
     const t = getTotals();
     const count = t.pCount + cart.courses.length;
@@ -113,7 +113,7 @@
     box.innerHTML = html;
   }
 
-  // --- ACTIONS ---
+  // --- ACCIONES GLOBALES ---
   window.RF = {
     addP: (id) => { if(cart.providers.includes(id)) return toast('Ya tienes este proveedor', 'error'); cart.providers.push(id); saveCart(); toast('Proveedor añadido'); openDrawer(); },
     rmP: (id) => { cart.providers = cart.providers.filter(x => x!==id); saveCart(); },
@@ -150,7 +150,6 @@
         btn.textContent = 'Enviando...';
         btn.disabled = true;
         
-        // Enviar a contact.php
         const fd = new FormData(contactForm);
         fetch('contact.php', { method: 'POST', body: fd })
           .then(res => res.json())
@@ -176,7 +175,7 @@
     });
   }
 
-  // --- COOKIES (FIXED DOMContentLoaded) ---
+  // --- COOKIES ---
   document.addEventListener('DOMContentLoaded', () => {
     const banner = $('#cookieBanner');
     const acceptBtn = $('#cookieAccept');
@@ -191,7 +190,6 @@
         localStorage.setItem('rf_cookie_consent', choice);
         banner.style.opacity = '0';
         setTimeout(() => banner.style.display = 'none', 500);
-        // Enviar al backend (opcional)
         const fd = new FormData(); fd.append('choice', choice);
         fetch('cookies.php', {method:'POST', body:fd}).catch(()=>{});
     }
