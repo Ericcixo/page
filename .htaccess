@@ -1,47 +1,30 @@
-# 1. Proteger archivos sensibles (CRÍTICO)
-# Evita que nadie descargue tus logs o CSVs desde el navegador
-<FilesMatch "\.(csv|log|txt|php|json)$">
-    Order Allow,Deny
-    Deny from all
-</FilesMatch>
-# Permitir acceso a archivos públicos específicos si es necesario (ej. robots.txt)
-<FilesMatch "(index\.html|robots\.txt|sitemap\.xml|manifest\.json)$">
-    Order Allow,Deny
-    Allow from all
-</FilesMatch>
-# Permitir ejecución de scripts PHP pero no ver su código
-<FilesMatch "\.php$">
-    Order Allow,Deny
-    Allow from all
-</FilesMatch>
-
-# Bloquear acceso directo a la carpeta de datos
 RewriteEngine On
-RewriteRule ^data/ - [F,L]
 
-# 2. Forzar HTTPS
+# 1. Forzar HTTPS (Seguridad)
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# 3. URLs Limpias (Quitar .html)
-# Permite entrar a /checkout en lugar de /checkout.html
+# 2. Quitar extensión .html de la URL (Redirección Externa)
+# Si el usuario escribe "pagina.html", lo redirige a "pagina"
+RewriteCond %{THE_REQUEST} /([^.]+)\.html [NC]
+RewriteRule ^ /%1 [L,R=301]
+
+# 3. Mapear URL limpia a archivo .html (Redirección Interna)
+# Si el usuario pide "pagina", el servidor busca "pagina.html"
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}.html -f
 RewriteRule ^(.*)$ $1.html [L]
 
-# 4. Caché de navegador (Para que cargue ultra rápido)
-<IfModule mod_expires.c>
-  ExpiresActive On
-  ExpiresByType image/jpg "access plus 1 year"
-  ExpiresByType image/jpeg "access plus 1 year"
-  ExpiresByType image/gif "access plus 1 year"
-  ExpiresByType image/png "access plus 1 year"
-  ExpiresByType image/svg+xml "access plus 1 year"
-  ExpiresByType text/css "access plus 1 month"
-  ExpiresByType application/pdf "access plus 1 month"
-  ExpiresByType text/x-javascript "access plus 1 month"
-</IfModule>
+# 4. Proteger archivos sensibles
+<FilesMatch "\.(csv|log|txt|php|json)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+# Excepciones
+<FilesMatch "(index\.html|robots\.txt|sitemap\.xml|manifest\.json|contact\.php|cookies\.php)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
 
 # 5. Páginas de Error personalizadas
-ErrorDocument 404 /404.html
-ErrorDocument 403 /404.html
+ErrorDocument 404 /404
