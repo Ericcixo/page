@@ -1,0 +1,11 @@
+/* TEAM */
+  Founder: RevendeFácil Team
+  Contact: info@revendefacil.com
+  Twitter: @revendefacil
+  Location: España
+
+/* SITE */
+  Last update: 2025/11/28
+  Standards: HTML5, CSS3, JS (ES6)
+  Components: Glassmorphism UI, Parallax FX
+  Software: Custom eCommerce Engine
