@@ -4,11 +4,23 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5"/>
   <title>¡Gracias por tu compra! | RevendeFácil</title>
-  <meta name="robots" content="noindex"> <link rel="preconnect" href="https://fonts.googleapis.com">
+  <meta name="robots" content="noindex">
+  
+  <script>
+    (function(){
+      const params = new URLSearchParams(window.location.search);
+      // Si no hay orderId en la URL, te expulsa a la home
+      if(!params.has('orderId')) {
+        window.location.href = '/';
+      }
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="assets/css/styles.css?v=final"/>
+  <link rel="stylesheet" href="assets/css/styles.css?v=final2"/>
   <link rel="icon" href="img/logo.svg"/>
 </head>
 <body>
@@ -40,7 +52,7 @@
       <div class="glass-panel reveal" style="margin-top: 60px; text-align: center; max-width: 600px; margin-left: auto; margin-right: auto;">
         <h3 style="margin-top:0; font-family:var(--font-head)">¿Problemas con la descarga?</h3>
         <p style="color:var(--text-muted); margin-bottom:20px">Has recibido también una copia de los enlaces en tu correo electrónico. Revisa tu carpeta de Spam.</p>
-        <a href="contact" class="btn-ghost">Contactar Soporte</a>
+        <a href="contact.html" class="btn-ghost">Contactar Soporte</a>
       </div>
     </section>
   </main>
@@ -50,15 +62,15 @@
       <div class="brand">RevendeFácil © 2025</div>
       <div class="links">
         <a href="/">Inicio</a>
-        <a href="terms">Términos</a>
-        <a href="contact">Soporte</a>
+        <a href="terms.html">Términos</a>
+        <a href="contact.html">Soporte</a>
       </div>
     </div>
   </footer>
 
   <script>
     (function(){
-      // 1. Efecto Parallax Fondo
+      // Parallax
       document.addEventListener('mousemove', function(e) {
         const x = e.clientX / window.innerWidth;
         const y = e.clientY / window.innerHeight;
@@ -68,19 +80,13 @@
         if(g2) g2.style.transform = `translate(-${x*40}px, -${y*40}px)`;
       });
 
-      // 2. Recuperar carrito antes de borrarlo (para saber qué mostrar)
+      // Leer carrito anterior
       const rawCart = localStorage.getItem('rf_cart');
       const cart = rawCart ? JSON.parse(rawCart) : {providers:[], courses:[]};
       
-      // Si no hay nada (acceso directo), mostrar mensaje
-      if((!cart.providers || cart.providers.length === 0) && (!cart.courses || cart.courses.length === 0)){
-         document.getElementById('orderMsg').textContent = 'No hemos detectado una compra reciente en este navegador. Revisa tu email.';
-      }
-
       const area = document.getElementById('downloadsArea');
       let html = '';
 
-      // Mapa de archivos (Asegúrate de que los nombres coinciden con tu carpeta /downloads)
       const fileMap = {
         'p1': { name: 'Prov. Zapatillas', file: 'proveedor-1.pdf', icon: '👟' },
         'p2': { name: 'Prov. Vapers', file: 'proveedor-2.pdf', icon: '💨' },
@@ -91,24 +97,15 @@
         'c3': { name: 'Curso Anuncios', file: 'curso-anuncios-vinted.pdf', icon: '📢' }
       };
 
-      // Generar HTML Proveedores
-      if(cart.providers) {
-        cart.providers.forEach(id => {
-          const item = fileMap[id];
-          if(item) {
-            html += createCard(item);
-          }
-        });
-      }
-
-      // Generar HTML Cursos
-      if(cart.courses) {
-        cart.courses.forEach(c => {
-          const item = fileMap[c.id];
-          if(item) {
-            html += createCard(item);
-          }
-        });
+      // Si no hay carrito pero hay orderId (re-visita), mostramos todo por si acaso o un mensaje generico
+      // Para simplicidad en este modelo estático, si el carrito se borró, mostramos un mensaje de "Revisa tu email".
+      if((!cart.providers || cart.providers.length===0) && (!cart.courses || cart.courses.length===0)){
+         document.getElementById('orderMsg').textContent = 'Tu pedido se ha procesado. Revisa tu email para los enlaces de descarga.';
+      } else {
+          // Generar Cards
+          if(cart.providers) cart.providers.forEach(id => { if(fileMap[id]) html += createCard(fileMap[id]); });
+          if(cart.courses) cart.courses.forEach(c => { if(fileMap[c.id]) html += createCard(fileMap[c.id]); });
+          if(html) area.innerHTML = html;
       }
 
       function createCard(item){
@@ -123,16 +120,12 @@
         `;
       }
 
-      if(html) area.innerHTML = html;
-
-      // 3. Limpiar carrito después de procesar
+      // Limpiar carrito
       localStorage.removeItem('rf_cart');
       
-      // Animación de entrada
       setTimeout(() => {
         document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
       }, 100);
-
     })();
   </script>
 </body>
