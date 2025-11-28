@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>¡Gracias por tu compra! — RevendeFácil</title>
+  <link rel="stylesheet" href="assets/css/styles.css"/>
+  <link rel="icon" href="img/logo.svg"/>
+</head>
+<body>
+  <main class="container">
+    <h1>¡Gracias por tu compra! 🎉</h1>
+    <p class="subtitle">Tus descargas están listas abajo. También te hemos enviado un email de confirmación (demo).</p>
+
+    <div class="card"><div class="body">
+      <h3>Descargas de cursos</h3>
+      <div id="dlCourses"></div>
+    </div></div>
+
+    <div class="card" style="margin-top:16px;"><div class="body">
+      <h3>Fichas de proveedores</h3>
+      <div id="dlProviders"></div>
+    </div></div>
+
+    <div style="margin-top:20px;">
+      <a href="index.html" class="btn">Volver al inicio</a>
+      <a href="mailto:info@revendefacil.com" class="btn">Soporte</a>
+    </div>
+  </main>
+  <script src="assets/js/config.js"></script>
+  <script>
+  (function(){
+    function sp(v){ try{return JSON.parse(v||'null')}catch(e){return null} }
+    var cart = sp(localStorage.getItem('rf_cart')) || { providers: [], courses: [] };
+    var c = document.getElementById('dlCourses');
+    var p = document.getElementById('dlProviders');
+    function link(href, text){ var a=document.createElement('a'); a.href=href; a.textContent=text; a.className='btn'; a.style.marginRight='8px'; a.setAttribute('download',''); return a; }
+    var mapC = { c1:{title:'Curso Lujo', file:'downloads/curso-lujo-vinted.pdf'}, c2:{title:'Curso Seguridad', file:'downloads/curso-seguridad-vinted.pdf'}, c3:{title:'Curso Anuncios', file:'downloads/curso-anuncios-vinted.pdf'} };
+    var mapP = { p1:{title:'Proveedor 1', file:'downloads/proveedor-1.pdf'}, p2:{title:'Proveedor 2', file:'downloads/proveedor-2.pdf'}, p3:{title:'Proveedor 3', file:'downloads/proveedor-3.pdf'}, p4:{title:'Proveedor 4', file:'downloads/proveedor-4.pdf'} };
+    var any=false;
+    (cart.courses||[]).forEach(function(it){ var m=mapC[it.id]; if(m){ any=true; c.appendChild(link(m.file,m.title+' (PDF)')); }});
+    (cart.providers||[]).forEach(function(id){ var m=mapP[id]; if(m){ any=true; p.appendChild(link(m.file,m.title+' (PDF)')); }});
+    if(!any){ var d=document.createElement('div'); d.textContent='No se detectaron compras. Si crees que es un error, contáctanos: '+(CONFIG.brand.email||'info@revendefacil.com'); document.body.appendChild(d); }
+    localStorage.removeItem('rf_cart');
+  })();
+  </script>
+
+  <div id="cookieBanner" class="cookie-banner" style="position:fixed;left:16px;right:16px;bottom:16px;z-index:100;background:#0f172a;color:#e2e8f0;border:1px solid rgba(148,163,184,.25);border-radius:12px;padding:14px 16px;display:none">
+    <div><strong>Cookies</strong> — Usamos cookies esenciales y anónimas para métricas. Tu elección quedará almacenada en el servidor.</div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button id="cookieAccept" class="btn primary">Aceptar</button>
+      <button id="cookieReject" class="btn">Rechazar</button>
+      <a href="terms.html" class="btn">Más info</a>
+    </div>
+  </div>
+  <script>
+    (function(){
+      function st(v){localStorage.setItem('rf_cookies',JSON.stringify(v));}
+      function gt(){try{return JSON.parse(localStorage.getItem('rf_cookies')||'null')}catch(e){return null}}
+      var b=document.getElementById('cookieBanner'); var stt=gt(); var qp=new URLSearchParams(location.search); if((!stt||qp.get('cookies')==='1'||location.hash==='#cookies') && b){ b.style.display='block'; }
+      var m=document.getElementById('cookieManage'); if(m){ m.style.display='inline-block'; m.addEventListener('click', function(){ if(b) b.style.display='block'; }); }
+      function send(choice){
+        var fd=new FormData(); fd.append('choice', choice); fd.append('ts', new Date().toISOString());
+        fetch('cookies.php',{method:'POST',body:fd,credentials:'same-origin'}).catch(function(){}) ;
+      }
+      var a=document.getElementById('cookieAccept'); if(a) a.addEventListener('click', function(){ st({choice:'accept',ts:Date.now()}); send('accept'); b.style.display='none'; });
+      var r=document.getElementById('cookieReject'); if(r) r.addEventListener('click', function(){ st({choice:'reject',ts:Date.now()}); send('reject'); b.style.display='none'; });
+    })();
+  </script>
+<button id="cookieManage" class="btn cookie-manage" style="display:none">Cookies</button>
+</body>
+</html>
