@@ -2,71 +2,138 @@
 <html lang="es" data-theme="dark">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>¡Gracias por tu compra! — RevendeFácil</title>
-  <link rel="stylesheet" href="assets/css/styles.css"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5"/>
+  <title>¡Gracias por tu compra! | RevendeFácil</title>
+  <meta name="robots" content="noindex"> <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="assets/css/styles.css?v=final"/>
   <link rel="icon" href="img/logo.svg"/>
 </head>
 <body>
-  <main class="container">
-    <h1>¡Gracias por tu compra! 🎉</h1>
-    <p class="subtitle">Tus descargas están listas abajo. También te hemos enviado un email de confirmación (demo).</p>
-
-    <div class="card"><div class="body">
-      <h3>Descargas de cursos</h3>
-      <div id="dlCourses"></div>
-    </div></div>
-
-    <div class="card" style="margin-top:16px;"><div class="body">
-      <h3>Fichas de proveedores</h3>
-      <div id="dlProviders"></div>
-    </div></div>
-
-    <div style="margin-top:20px;">
-      <a href="index.html" class="btn">Volver al inicio</a>
-      <a href="mailto:info@revendefacil.com" class="btn">Soporte</a>
-    </div>
-  </main>
-  <script src="assets/js/config.js"></script>
-  <script>
-  (function(){
-    function sp(v){ try{return JSON.parse(v||'null')}catch(e){return null} }
-    var cart = sp(localStorage.getItem('rf_cart')) || { providers: [], courses: [] };
-    var c = document.getElementById('dlCourses');
-    var p = document.getElementById('dlProviders');
-    function link(href, text){ var a=document.createElement('a'); a.href=href; a.textContent=text; a.className='btn'; a.style.marginRight='8px'; a.setAttribute('download',''); return a; }
-    var mapC = { c1:{title:'Curso Lujo', file:'downloads/curso-lujo-vinted.pdf'}, c2:{title:'Curso Seguridad', file:'downloads/curso-seguridad-vinted.pdf'}, c3:{title:'Curso Anuncios', file:'downloads/curso-anuncios-vinted.pdf'} };
-    var mapP = { p1:{title:'Proveedor 1', file:'downloads/proveedor-1.pdf'}, p2:{title:'Proveedor 2', file:'downloads/proveedor-2.pdf'}, p3:{title:'Proveedor 3', file:'downloads/proveedor-3.pdf'}, p4:{title:'Proveedor 4', file:'downloads/proveedor-4.pdf'} };
-    var any=false;
-    (cart.courses||[]).forEach(function(it){ var m=mapC[it.id]; if(m){ any=true; c.appendChild(link(m.file,m.title+' (PDF)')); }});
-    (cart.providers||[]).forEach(function(id){ var m=mapP[id]; if(m){ any=true; p.appendChild(link(m.file,m.title+' (PDF)')); }});
-    if(!any){ var d=document.createElement('div'); d.textContent='No se detectaron compras. Si crees que es un error, contáctanos: '+(CONFIG.brand.email||'info@revendefacil.com'); document.body.appendChild(d); }
-    localStorage.removeItem('rf_cart');
-  })();
-  </script>
-
-  <div id="cookieBanner" class="cookie-banner" style="position:fixed;left:16px;right:16px;bottom:16px;z-index:100;background:#0f172a;color:#e2e8f0;border:1px solid rgba(148,163,184,.25);border-radius:12px;padding:14px 16px;display:none">
-    <div><strong>Cookies</strong> — Usamos cookies esenciales y anónimas para métricas. Tu elección quedará almacenada en el servidor.</div>
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <button id="cookieAccept" class="btn primary">Aceptar</button>
-      <button id="cookieReject" class="btn">Rechazar</button>
-      <a href="terms.html" class="btn">Más info</a>
-    </div>
+  
+  <div class="ambient-glows">
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+    <div class="glow glow-3"></div>
   </div>
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="/" class="social-link" style="width:auto; height:auto; background:none; border:none; color:white; font-weight:700; text-decoration:none;">← Volver al Inicio</a>
+      <div class="brand" style="font-family: var(--font-head); font-weight:800; font-size:20px;">RevendeFácil</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section" style="padding-top: 40px;">
+      <div class="reveal" style="text-align:center; max-width:700px; margin:0 auto;">
+        <div style="font-size:60px; margin-bottom:20px;">🎉</div>
+        <h1 class="h1-premium">¡Pedido <span class="gradient-text">Confirmado!</span></h1>
+        <p class="subtitle" id="orderMsg">Gracias por confiar en nosotros. Aquí tienes tus productos listos para descargar.</p>
+      </div>
+
+      <div id="downloadsArea" class="grid reveal" style="margin-top: 50px;">
+        </div>
+
+      <div class="glass-panel reveal" style="margin-top: 60px; text-align: center; max-width: 600px; margin-left: auto; margin-right: auto;">
+        <h3 style="margin-top:0; font-family:var(--font-head)">¿Problemas con la descarga?</h3>
+        <p style="color:var(--text-muted); margin-bottom:20px">Has recibido también una copia de los enlaces en tu correo electrónico. Revisa tu carpeta de Spam.</p>
+        <a href="contact" class="btn-ghost">Contactar Soporte</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner container">
+      <div class="brand">RevendeFácil © 2025</div>
+      <div class="links">
+        <a href="/">Inicio</a>
+        <a href="terms">Términos</a>
+        <a href="contact">Soporte</a>
+      </div>
+    </div>
+  </footer>
+
   <script>
     (function(){
-      function st(v){localStorage.setItem('rf_cookies',JSON.stringify(v));}
-      function gt(){try{return JSON.parse(localStorage.getItem('rf_cookies')||'null')}catch(e){return null}}
-      var b=document.getElementById('cookieBanner'); var stt=gt(); var qp=new URLSearchParams(location.search); if((!stt||qp.get('cookies')==='1'||location.hash==='#cookies') && b){ b.style.display='block'; }
-      var m=document.getElementById('cookieManage'); if(m){ m.style.display='inline-block'; m.addEventListener('click', function(){ if(b) b.style.display='block'; }); }
-      function send(choice){
-        var fd=new FormData(); fd.append('choice', choice); fd.append('ts', new Date().toISOString());
-        fetch('cookies.php',{method:'POST',body:fd,credentials:'same-origin'}).catch(function(){}) ;
+      // 1. Efecto Parallax Fondo
+      document.addEventListener('mousemove', function(e) {
+        const x = e.clientX / window.innerWidth;
+        const y = e.clientY / window.innerHeight;
+        const g1 = document.querySelector('.glow-1');
+        const g2 = document.querySelector('.glow-2');
+        if(g1) g1.style.transform = `translate(${x*30}px, ${y*30}px)`;
+        if(g2) g2.style.transform = `translate(-${x*40}px, -${y*40}px)`;
+      });
+
+      // 2. Recuperar carrito antes de borrarlo (para saber qué mostrar)
+      const rawCart = localStorage.getItem('rf_cart');
+      const cart = rawCart ? JSON.parse(rawCart) : {providers:[], courses:[]};
+      
+      // Si no hay nada (acceso directo), mostrar mensaje
+      if((!cart.providers || cart.providers.length === 0) && (!cart.courses || cart.courses.length === 0)){
+         document.getElementById('orderMsg').textContent = 'No hemos detectado una compra reciente en este navegador. Revisa tu email.';
       }
-      var a=document.getElementById('cookieAccept'); if(a) a.addEventListener('click', function(){ st({choice:'accept',ts:Date.now()}); send('accept'); b.style.display='none'; });
-      var r=document.getElementById('cookieReject'); if(r) r.addEventListener('click', function(){ st({choice:'reject',ts:Date.now()}); send('reject'); b.style.display='none'; });
+
+      const area = document.getElementById('downloadsArea');
+      let html = '';
+
+      // Mapa de archivos (Asegúrate de que los nombres coinciden con tu carpeta /downloads)
+      const fileMap = {
+        'p1': { name: 'Prov. Zapatillas', file: 'proveedor-1.pdf', icon: '👟' },
+        'p2': { name: 'Prov. Vapers', file: 'proveedor-2.pdf', icon: '💨' },
+        'p3': { name: 'Prov. Relojes', file: 'proveedor-3.pdf', icon: '⌚' },
+        'p4': { name: 'Prov. Colonias', file: 'proveedor-4.pdf', icon: '✨' },
+        'c1': { name: 'Curso Lujo', file: 'curso-lujo-vinted.pdf', icon: '💎' },
+        'c2': { name: 'Curso Seguridad', file: 'curso-seguridad-vinted.pdf', icon: '🔒' },
+        'c3': { name: 'Curso Anuncios', file: 'curso-anuncios-vinted.pdf', icon: '📢' }
+      };
+
+      // Generar HTML Proveedores
+      if(cart.providers) {
+        cart.providers.forEach(id => {
+          const item = fileMap[id];
+          if(item) {
+            html += createCard(item);
+          }
+        });
+      }
+
+      // Generar HTML Cursos
+      if(cart.courses) {
+        cart.courses.forEach(c => {
+          const item = fileMap[c.id];
+          if(item) {
+            html += createCard(item);
+          }
+        });
+      }
+
+      function createCard(item){
+        return `
+        <div class="glass-card" style="align-items:center; text-align:center; padding:30px;">
+          <div class="glow-border"></div>
+          <div style="font-size:40px; margin-bottom:16px;">${item.icon}</div>
+          <h3 style="margin:0 0 8px 0; font-family:var(--font-head)">${item.name}</h3>
+          <p style="color:var(--text-muted); font-size:13px; margin-bottom:20px;">Formato PDF • Descarga Segura</p>
+          <a href="downloads/${item.file}" download class="btn-glow" style="width:100%; text-decoration:none;">Descargar Ahora ↓</a>
+        </div>
+        `;
+      }
+
+      if(html) area.innerHTML = html;
+
+      // 3. Limpiar carrito después de procesar
+      localStorage.removeItem('rf_cart');
+      
+      // Animación de entrada
+      setTimeout(() => {
+        document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+      }, 100);
+
     })();
   </script>
-<button id="cookieManage" class="btn cookie-manage" style="display:none">Cookies</button>
 </body>
 </html>
