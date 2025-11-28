@@ -7,20 +7,14 @@
   <meta name="robots" content="noindex">
   
   <script>
-    (function(){
-      const params = new URLSearchParams(window.location.search);
-      // Si no hay orderId en la URL, te expulsa a la home
-      if(!params.has('orderId')) {
-        window.location.href = '/';
-      }
-    })();
+    if(!new URLSearchParams(window.location.search).has('orderId')) window.location.href = '/';
   </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="assets/css/styles.css?v=final2"/>
+  <link rel="stylesheet" href="assets/css/styles.css?v=final3"/>
   <link rel="icon" href="img/logo.svg"/>
 </head>
 <body>
@@ -46,12 +40,11 @@
         <p class="subtitle" id="orderMsg">Gracias por confiar en nosotros. Aquí tienes tus productos listos para descargar.</p>
       </div>
 
-      <div id="downloadsArea" class="grid reveal" style="margin-top: 50px;">
-        </div>
+      <div id="downloadsArea" class="grid reveal" style="margin-top: 50px;"></div>
 
       <div class="glass-panel reveal" style="margin-top: 60px; text-align: center; max-width: 600px; margin-left: auto; margin-right: auto;">
         <h3 style="margin-top:0; font-family:var(--font-head)">¿Problemas con la descarga?</h3>
-        <p style="color:var(--text-muted); margin-bottom:20px">Has recibido también una copia de los enlaces en tu correo electrónico. Revisa tu carpeta de Spam.</p>
+        <p style="color:var(--text-muted); margin-bottom:20px">Has recibido también una copia en tu correo. Revisa Spam.</p>
         <a href="contact.html" class="btn-ghost">Contactar Soporte</a>
       </div>
     </section>
@@ -68,59 +61,54 @@
     </div>
   </footer>
 
+  <script src="assets/js/config.js"></script>
   <script>
     (function(){
-      // Parallax
+      // Parallax Mouse
       document.addEventListener('mousemove', function(e) {
-        const x = e.clientX / window.innerWidth;
-        const y = e.clientY / window.innerHeight;
-        const g1 = document.querySelector('.glow-1');
-        const g2 = document.querySelector('.glow-2');
-        if(g1) g1.style.transform = `translate(${x*30}px, ${y*30}px)`;
-        if(g2) g2.style.transform = `translate(-${x*40}px, -${y*40}px)`;
+        document.body.style.setProperty('--mouse-x', e.clientX + 'px');
+        document.body.style.setProperty('--mouse-y', e.clientY + 'px');
       });
 
-      // Leer carrito anterior
+      const CONFIG = window.RF_CONFIG;
       const rawCart = localStorage.getItem('rf_cart');
       const cart = rawCart ? JSON.parse(rawCart) : {providers:[], courses:[]};
-      
       const area = document.getElementById('downloadsArea');
-      let html = '';
-
-      const fileMap = {
-        'p1': { name: 'Prov. Zapatillas', file: 'proveedor-1.pdf', icon: '👟' },
-        'p2': { name: 'Prov. Vapers', file: 'proveedor-2.pdf', icon: '💨' },
-        'p3': { name: 'Prov. Relojes', file: 'proveedor-3.pdf', icon: '⌚' },
-        'p4': { name: 'Prov. Colonias', file: 'proveedor-4.pdf', icon: '✨' },
-        'c1': { name: 'Curso Lujo', file: 'curso-lujo-vinted.pdf', icon: '💎' },
-        'c2': { name: 'Curso Seguridad', file: 'curso-seguridad-vinted.pdf', icon: '🔒' },
-        'c3': { name: 'Curso Anuncios', file: 'curso-anuncios-vinted.pdf', icon: '📢' }
+      
+      // Mapeo manual de archivos (esto sí es específico de descarga)
+      const filePaths = {
+        'p1': 'proveedor-1.pdf', 'p2': 'proveedor-2.pdf', 'p3': 'proveedor-3.pdf', 'p4': 'proveedor-4.pdf',
+        'c1': 'curso-lujo-vinted.pdf', 'c2': 'curso-seguridad-vinted.pdf', 'c3': 'curso-anuncios-vinted.pdf'
       };
 
-      // Si no hay carrito pero hay orderId (re-visita), mostramos todo por si acaso o un mensaje generico
-      // Para simplicidad en este modelo estático, si el carrito se borró, mostramos un mensaje de "Revisa tu email".
-      if((!cart.providers || cart.providers.length===0) && (!cart.courses || cart.courses.length===0)){
-         document.getElementById('orderMsg').textContent = 'Tu pedido se ha procesado. Revisa tu email para los enlaces de descarga.';
-      } else {
-          // Generar Cards
-          if(cart.providers) cart.providers.forEach(id => { if(fileMap[id]) html += createCard(fileMap[id]); });
-          if(cart.courses) cart.courses.forEach(c => { if(fileMap[c.id]) html += createCard(fileMap[c.id]); });
-          if(html) area.innerHTML = html;
+      let html = '';
+      
+      const allItems = [...cart.providers, ...cart.courses.map(c=>c.id)];
+      
+      // Si el carrito está vacío pero hay pedido (refresh), mostrar mensaje genérico
+      if(allItems.length === 0){
+         document.getElementById('orderMsg').textContent = 'Tu pedido se ha procesado correctamente. Revisa tu email para los enlaces.';
       }
 
-      function createCard(item){
-        return `
-        <div class="glass-card" style="align-items:center; text-align:center; padding:30px;">
-          <div class="glow-border"></div>
-          <div style="font-size:40px; margin-bottom:16px;">${item.icon}</div>
-          <h3 style="margin:0 0 8px 0; font-family:var(--font-head)">${item.name}</h3>
-          <p style="color:var(--text-muted); font-size:13px; margin-bottom:20px;">Formato PDF • Descarga Segura</p>
-          <a href="downloads/${item.file}" download class="btn-glow" style="width:100%; text-decoration:none;">Descargar Ahora ↓</a>
-        </div>
-        `;
-      }
+      allItems.forEach(id => {
+        const product = CONFIG.products[id]; // Leemos nombre e icono del config central
+        const file = filePaths[id];
+        
+        if(product && file) {
+          html += `
+          <div class="glass-card" style="align-items:center; text-align:center; padding:30px;">
+            <div class="glow-border"></div>
+            <div style="font-size:40px; margin-bottom:16px;">${product.icon}</div>
+            <h3 style="margin:0 0 8px 0; font-family:var(--font-head)">${product.name}</h3>
+            <p style="color:var(--text-muted); font-size:13px; margin-bottom:20px;">Formato PDF • Descarga Segura</p>
+            <a href="downloads/${file}" download class="btn-glow" style="width:100%; text-decoration:none;">Descargar Ahora ↓</a>
+          </div>`;
+        }
+      });
 
-      // Limpiar carrito
+      if(html) area.innerHTML = html;
+
+      // Limpiar carrito (pedido completado)
       localStorage.removeItem('rf_cart');
       
       setTimeout(() => {
