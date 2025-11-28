@@ -92,6 +92,21 @@
       '<button class="btn" data-rm-c="'+it.id+'" style="margin-left:8px;">Eliminar</button>'+
       '</div></div>'; });
     if(!html) html = '<div class="subtitle">Tu carrito está vacío.</div>';
+    // ... código anterior de renderLines ...
+    
+    // MEJORA: Cross-selling
+    // Si hay proveedores pero NO hay cursos, sugerimos el curso de seguridad
+    if(cart.providers.length > 0 && (!cart.courses || cart.courses.length === 0)){
+       html += '<div class="line" style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.2); border-radius:8px; padding:8px 12px; display:block; margin-top:10px;">'+
+               '<div style="font-size:13px; margin-bottom:4px; color:#bbf7d0">🔥 ¡Recomendado! Añade el <strong>Curso de Seguridad</strong> para evitar baneos.</div>'+
+               '<button class="btn primary" style="width:100%; padding:6px; font-size:13px;" data-inc="c2">Añadir por 1€</button>'+
+               '</div>';
+    }
+
+    if(!html) html = '<div class="subtitle" style="text-align:center; padding:20px;">Tu carrito está vacío.<br><br><span style="font-size:30px">🛒</span></div>';
+    
+    box.innerHTML = html;
+    // ... resto de bindings ...
     box.innerHTML = html;
     // bind actions
     $$("[data-rm-p]", box).forEach(function(b){ b.addEventListener('click', function(){ rmProvider(b.getAttribute('data-rm-p')); }); });
