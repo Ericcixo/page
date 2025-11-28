@@ -1,111 +1,117 @@
 (function(){
   'use strict';
   
-  var SAFE_PRICES = {
-    providerUnit: 2,
-    bundles: {'2':4, '3':5, '4':6}, // 4 proveedores = 6€
-    courseUnit: 1
-  };
+  const CONFIG = window.RF_CONFIG;
+  if(!CONFIG) { alert('Error de configuración. Recarga la página.'); return; }
 
-  if(!window.CONFIG){ window.CONFIG = { pricing:{ providerUnit:2, bundles:{'2':4,'3':5,'4':6}, courseUnit:1, currency:'€' }, paypal:{ currency:'EUR' } }; }
+  const $ = (sel) => document.querySelector(sel);
   
-  function $(s){ return document.querySelector(s); }
-  function sp(v){ try{return JSON.parse(v||'null')}catch(e){return null} }
-  var cart = sp(localStorage.getItem('rf_cart')) || { providers: [], courses: [] };
+  // Recuperar carrito
+  let cart = { providers: [], courses: [] };
+  try { cart = JSON.parse(localStorage.getItem('rf_cart')) || cart; } catch(e){}
 
-  // --- LÓGICA DE PRECIOS VISUAL ---
-  function getBundlePrice(n) {
-    if (n <= 0) return 0;
-    if (n === 1) return SAFE_PRICES.providerUnit;
-    if (n === 2) return SAFE_PRICES.bundles['2'];
-    if (n === 3) return SAFE_PRICES.bundles['3'];
-    if (n === 4) return SAFE_PRICES.bundles['4'];
-    // Si hay más de 4, cobramos el pack de 4 (6€) + precio unitario por cada extra
-    // Ejemplo: 5 proveedores = 6€ + 2€ = 8€
-    return SAFE_PRICES.bundles['4'] + ((n - 4) * SAFE_PRICES.providerUnit);
+  // Cálculo de totales (Reutiliza lógica si es posible o replícala exacta)
+  function getSecureTotal() {
+    const uniqueP = [...new Set(cart.providers)].length;
+    let pPrice = 0;
+    if(uniqueP < CONFIG.pricing.bundleThreshold) {
+        pPrice = uniqueP * CONFIG.pricing.providerUnit;
+    } else {
+        pPrice = CONFIG.pricing.bundlePrice + ((uniqueP - CONFIG.pricing.bundleThreshold) * CONFIG.pricing.providerUnit);
+    }
+    
+    let cPrice = 0;
+    cart.courses.forEach(c => cPrice += CONFIG.pricing.courseUnit);
+    
+    return (pPrice + cPrice).toFixed(2);
   }
 
-  function totals(){ 
-    // Usamos Set para eliminar duplicados si alguien manipuló localStorage
-    var uniqueProviders = [...new Set(cart.providers)];
-    var pc = uniqueProviders.length;
+  function renderSummary(){
+    const s = $('#summary');
+    const total = getSecureTotal();
     
-    var pPrice = getBundlePrice(pc);
-    var pNom = pc * SAFE_PRICES.providerUnit;
-    var save = Math.max(0, pNom - pPrice);
-    
-    var cPrice = 0; 
-    (cart.courses||[]).forEach(function(it){ 
-      var q = Math.max(1, parseInt(it.qty) || 1);
-      cPrice += q * SAFE_PRICES.courseUnit; 
-    });
-    
-    return {pc:pc, pNom:pNom, pPrice:pPrice, pSave:save, cPrice:cPrice, total:pPrice+cPrice}; 
-  }
+    if(parseFloat(total) <= 0){
+        s.innerHTML = '<div style="text-align:center; padding:20px;">Tu carrito está vacío.<br><a href="index.html" style="color:var(--primary)">Volver a la tienda</a></div>';
+        return;
+    }
 
-  function fe(n){ return (n||0).toFixed(2).replace('.', ',') + (CONFIG.pricing.currency||'€'); }
-  
-  function render(){ 
-    var t=totals(); 
-    var s=$('#summary'); 
-    var provNombres = {p1:'Zapatillas', p2:'Vapers', p3:'Relojes', p4:'Colonias'};
-    // Filtrar duplicados visualmente también
-    var uniqueP = [...new Set(cart.providers)];
-    
-    var provText = uniqueP.map(function(id){ return provNombres[id] || 'Proveedor '+id; }).join(', ') || 'Ninguno';
-    var courseText = cart.courses.map(function(it){ return (it.id==='c1'?'Lujo':it.id==='c2'?'Seguridad':'Anuncios') + (it.qty>1?' x'+it.qty:''); }).join(', ') || 'Ninguno';
-    
+    // Generar lista bonita usando nombres del CONFIG
+    const pList = [...new Set(cart.providers)].map(id => CONFIG.products[id]?.name || id).join(', ') || 'Ninguno';
+    const cList = cart.courses.map(c => CONFIG.products[c.id]?.name || c.id).join(', ') || 'Ninguno';
+
     s.innerHTML = `
-      <div class="subtitle" style="font-size:14px">Proveedores: <span style="color:white">${provText}</span></div>
-      <div class="subtitle" style="font-size:14px">Cursos: <span style="color:white">${courseText}</span></div>
-      <div style="margin-top:16px; border-top:1px solid rgba(255,255,255,0.1); padding-top:12px;">
-        <div style="display:flex;justify-content:space-between"><span>Proveedores:</span> <span>${fe(t.pPrice)} ${t.pSave>0 ? '<small style="color:#86efac">(-'+fe(t.pSave)+')</small>' : ''}</span></div>
-        <div style="display:flex;justify-content:space-between"><span>Cursos:</span> <span>${fe(t.cPrice)}</span></div>
-        <div style="display:flex;justify-content:space-between; margin-top:10px; font-size:20px; color:#a7f3d0; font-weight:bold;">
-          <span>Total:</span> <span>${fe(t.total)}</span>
-        </div>
-      </div>`;
+      <div style="margin-bottom:16px;">
+        <div style="font-size:14px; color:var(--text-muted); margin-bottom:4px;">Proveedores:</div>
+        <div style="color:var(--text-main); font-weight:500;">${pList}</div>
+      </div>
+      <div style="margin-bottom:16px;">
+        <div style="font-size:14px; color:var(--text-muted); margin-bottom:4px;">Cursos:</div>
+        <div style="color:var(--text-main); font-weight:500;">${cList}</div>
+      </div>
+      <div style="margin-top:20px; border-top:1px solid var(--border-light); padding-top:16px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:18px;">Total a pagar:</span>
+        <span style="font-size:24px; font-weight:800; color:var(--accent-success);">${total}${CONFIG.pricing.currency}</span>
+      </div>
+    `;
   }
-  render();
 
-  // --- PAYPAL ---
-  var checkbox = $('#acceptTerms'); var container = $('#paypalContainer'); var notice = $('#payNotice');
-  
-  function mount(){ 
-    if(!window.__paypalReady || !window.paypal || !paypal.Buttons) return; 
-    container.innerHTML = ''; 
-    
-    pp.Buttons({ 
-      style:{ layout:'vertical', color:'blue', shape:'rect', label:'pay' }, 
-      onInit: function(d,a){ 
-        if(!checkbox.checked) a.disable(); 
-        checkbox.addEventListener('change', function(){ checkbox.checked ? a.enable() : a.disable(); }); 
-      }, 
-      createOrder: function(d,a){ 
-        var t = totals(); // Usamos la función segura 'totals' que ya limpia duplicados
-        if(t.total <= 0){ alert('El carrito está vacío.'); return; } 
+  renderSummary();
+
+  // Integración PayPal
+  const checkbox = $('#acceptTerms');
+  const container = $('#paypalContainer');
+  const notice = $('#payNotice');
+  const errorBox = $('#errorBox');
+
+  function mountPayPal(){
+    if(!window.paypal || !window.paypal.Buttons) return;
+    container.innerHTML = ''; // Limpiar previo
+
+    paypal.Buttons({
+      style: { layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay' },
+      
+      onInit: function(data, actions) {
+        if(!checkbox.checked) actions.disable();
+        checkbox.addEventListener('change', () => {
+          checkbox.checked ? actions.enable() : actions.disable();
+          notice.style.opacity = checkbox.checked ? '0' : '1';
+        });
+      },
+
+      createOrder: function(data, actions) {
+        const amount = getSecureTotal();
+        if(amount <= 0) return;
         
-        return a.order.create({ 
-          purchase_units: [{ 
-            amount: { currency_code: 'EUR', value: t.total.toFixed(2) }, 
-            description: 'RevendeFácil Pedido (' + t.pc + ' prov, ' + cart.courses.length + ' cur)' 
-          }], 
-          application_context: { shipping_preference: 'NO_SHIPPING' } 
-        }); 
-      }, 
-      onApprove: function(d,a){ 
-        return a.order.capture().then(function(details){ 
-          localStorage.setItem('rf_cart', JSON.stringify(cart)); 
-          window.location.href = 'gracias.html?orderId=' + encodeURIComponent(details.id||''); 
-        }); 
-      }, 
-      onError: function(err){ 
-        var eb=document.getElementById('errorBox'); 
-        if(eb){ eb.style.display='block'; eb.textContent='Hubo un error con PayPal. Por favor, recarga e intenta de nuevo.'; }
-      } 
-    }).render('#paypalContainer'); 
+        return actions.order.create({
+          purchase_units: [{
+            description: 'RevendeFácil Pedido Digital',
+            amount: { currency_code: CONFIG.paypal.currency, value: amount }
+          }],
+          application_context: { shipping_preference: 'NO_SHIPPING' }
+        });
+      },
+
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+          // Éxito: Redirigir
+          window.location.href = 'gracias.html?orderId=' + encodeURIComponent(details.id);
+        });
+      },
+
+      onError: function(err) {
+        console.error(err);
+        errorBox.style.display = 'block';
+        errorBox.textContent = 'Hubo un problema con el pago. Por favor intenta de nuevo o usa tarjeta.';
+      }
+    }).render('#paypalContainer');
   }
-  
-  var iv = setInterval(function(){ if(window.__paypalReady && window.paypal){ clearInterval(iv); if(checkbox && checkbox.checked){ mount(); } } }, 250);
-  if(checkbox){ checkbox.addEventListener('change', function(){ if(checkbox.checked){ notice.textContent='PayPal listo.'; mount(); } else { container.innerHTML=''; notice.textContent='Marca la casilla para habilitar el pago.'; } }); }
+
+  // Esperar a que cargue PayPal SDK
+  const checkPP = setInterval(() => {
+    if(window.paypal){
+      clearInterval(checkPP);
+      mountPayPal();
+    }
+  }, 100);
+
 })();
