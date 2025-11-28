@@ -1,13 +1,35 @@
 (function(){
   'use strict';
   
-  // --- EFECTO SPOTLIGHT MOUSE (Lo complicado hecho fácil) ---
+  // --- EFECTO SPOTLIGHT MOUSE ---
   document.addEventListener('mousemove', function(e) {
     const x = e.clientX;
     const y = e.clientY;
     document.body.style.setProperty('--mouse-x', x + 'px');
     document.body.style.setProperty('--mouse-y', y + 'px');
   });
+
+  // --- THEME TOGGLE LOGIC (NUEVO) ---
+  const themeBtn = document.getElementById('themeToggle');
+  const themeIcon = document.getElementById('themeIcon');
+  const html = document.documentElement;
+
+  function setTheme(theme) {
+    html.setAttribute('data-theme', theme);
+    localStorage.setItem('rf_theme', theme);
+    if(themeIcon) themeIcon.textContent = theme === 'dark' ? '🌙' : '☀️';
+  }
+
+  // Cargar tema guardado
+  const savedTheme = localStorage.getItem('rf_theme') || 'dark';
+  setTheme(savedTheme);
+
+  if(themeBtn) {
+    themeBtn.addEventListener('click', () => {
+      const current = html.getAttribute('data-theme');
+      setTheme(current === 'dark' ? 'light' : 'dark');
+    });
+  }
 
   // --- CONFIGURACIÓN & ESTADO ---
   window.RF = window.RF || {};
@@ -66,36 +88,36 @@
     if(!box) return;
     
     if(cart.providers.length === 0 && cart.courses.length === 0){
-      box.innerHTML = '<div style="text-align:center; padding:60px 20px; color:rgba(255,255,255,0.3); display:flex; flex-direction:column; align-items:center; gap:16px"><div style="font-size:40px;">🛒</div><div>Tu carrito está vacío</div></div>';
+      box.innerHTML = '<div style="text-align:center; padding:60px 20px; opacity:0.5; display:flex; flex-direction:column; align-items:center; gap:16px"><div style="font-size:40px;">🛒</div><div>Tu carrito está vacío</div></div>';
       return;
     }
 
     let html = '';
     const pNames = {p1:'Zapatillas', p2:'Vapers', p3:'Relojes', p4:'Colonias'};
     [...new Set(cart.providers)].forEach(id => {
-      html += `<div class="line" style="display:flex; justify-content:space-between; margin-bottom:16px; border-bottom:1px dashed rgba(255,255,255,0.1); padding-bottom:12px;">
+      html += `<div class="line" style="display:flex; justify-content:space-between; margin-bottom:16px; border-bottom:1px dashed var(--border-light); padding-bottom:12px;">
         <div style="display:flex; gap:12px; align-items:center;">
            <div style="background:rgba(59,130,246,0.1); width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px;">📦</div>
-           <div><div style="font-weight:600; font-size:15px;">${pNames[id] || 'Proveedor'}</div><div style="font-size:12px; color:#94a3b8">Verificado</div></div>
+           <div><div style="font-weight:600; font-size:15px;">${pNames[id] || 'Proveedor'}</div><div style="font-size:12px; opacity:0.7">Verificado</div></div>
         </div>
-        <button class="btn-ghost" style="padding:8px; color:#f87171" onclick="window.RF.rmP('${id}')">✕</button>
+        <button class="btn-ghost" style="padding:8px; color:var(--danger)" onclick="window.RF.rmP('${id}')">✕</button>
       </div>`;
     });
 
     const cNames = {c1:'Curso Lujo', c2:'Curso Seguridad', c3:'Curso Anuncios'};
     cart.courses.forEach(c => {
-      html += `<div class="line" style="display:flex; justify-content:space-between; margin-bottom:16px; border-bottom:1px dashed rgba(255,255,255,0.1); padding-bottom:12px;">
+      html += `<div class="line" style="display:flex; justify-content:space-between; margin-bottom:16px; border-bottom:1px dashed var(--border-light); padding-bottom:12px;">
         <div style="display:flex; gap:12px; align-items:center;">
            <div style="background:rgba(139,92,246,0.1); width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px;">📚</div>
-           <div><div style="font-weight:600; font-size:15px;">${cNames[c.id] || 'Guía PDF'}</div><div style="font-size:12px; color:#94a3b8">Digital</div></div>
+           <div><div style="font-weight:600; font-size:15px;">${cNames[c.id] || 'Guía PDF'}</div><div style="font-size:12px; opacity:0.7">Digital</div></div>
         </div>
-        <button class="btn-ghost" style="padding:8px; color:#f87171" onclick="window.RF.rmC('${c.id}')">✕</button>
+        <button class="btn-ghost" style="padding:8px; color:var(--danger)" onclick="window.RF.rmC('${c.id}')">✕</button>
       </div>`;
     });
     
     if(cart.providers.length > 0 && cart.courses.length === 0){
        html += `<div style="margin-top:24px; background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.2); border-radius:12px; padding:16px;">
-         <div style="font-size:13px; margin-bottom:12px; color:#bfdbfe; line-height:1.4">💡 <strong>Consejo Pro:</strong> Protege tu cuenta con el Curso de Seguridad.</div>
+         <div style="font-size:13px; margin-bottom:12px; opacity:0.8; line-height:1.4">💡 <strong>Consejo Pro:</strong> Protege tu cuenta con el Curso de Seguridad.</div>
          <button class="btn-glow" style="padding:10px; font-size:13px; min-height:auto" onclick="window.RF.addC('c2')">Añadir (+1€)</button>
        </div>`;
     }
@@ -110,7 +132,7 @@
 
   function toast(msg, type='success'){
     const t = $('#toast');
-    t.innerHTML = `<div style="background:${type==='error'?'rgba(127,29,29,0.9)':'rgba(6,78,59,0.9)'}; backdrop-filter:blur(10px); color:${type==='error'?'#fca5a5':'#a7f3d0'}; padding:12px 24px; border-radius:99px; box-shadow:0 10px 40px rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.1); font-weight:600; font-size:14px;">${msg}</div>`;
+    t.innerHTML = `<div style="background:${type==='error'?'rgba(127,29,29,0.9)':'rgba(6,78,59,0.9)'}; backdrop-filter:blur(10px); color:${type==='error'?'#fca5a5':'#a7f3d0'}; padding:12px 24px; border-radius:99px; box-shadow:0 10px 40px rgba(0,0,0,0.6); border:1px solid var(--border-light); font-weight:600; font-size:14px;">${msg}</div>`;
     t.style.display = 'block'; t.style.animation = 'fadeUp 0.3s forwards';
     setTimeout(() => { t.style.display='none'; }, 3000);
   }
@@ -126,7 +148,7 @@
   if($('#clearCart')) $('#clearCart').addEventListener('click', () => { cart={providers:[],courses:[]}; saveCart(); });
   if($('#toCheckout')) $('#toCheckout').addEventListener('click', () => window.location.href='checkout.html');
 
-  // --- CONTACT FORM LOGIC ---
+  // --- CONTACT FORM ---
   const contactForm = $('#contactForm');
   if(contactForm){
     contactForm.addEventListener('submit', function(e){
@@ -135,8 +157,6 @@
         const originalText = btn.textContent;
         btn.textContent = 'Enviando...';
         btn.disabled = true;
-        
-        // Simulación de envío
         setTimeout(() => {
             btn.textContent = '¡Enviado!';
             btn.style.background = 'var(--accent-success)';
@@ -170,7 +190,7 @@
     if(type === 'course') window.RF.addC(id);
   });
 
-  // --- CALCULATOR & SCROLL ---
+  // --- CALCULATOR ---
   function updateCalc(){
     const cost = parseFloat($('#costProduct').value) || 0;
     const ship = parseFloat($('#costShip').value) || 0;
@@ -184,7 +204,7 @@
     $('#kCoste').textContent = formatMoney(totalCost);
     const kBenef = $('#kBenef');
     kBenef.textContent = formatMoney(profit);
-    kBenef.style.color = profit > 0 ? '#4ade80' : (profit < 0 ? '#f87171' : 'white');
+    kBenef.style.color = profit > 0 ? 'var(--accent-success)' : (profit < 0 ? 'var(--danger)' : 'inherit');
     $('#kMargen').textContent = margin.toFixed(1) + '%';
   }
   
