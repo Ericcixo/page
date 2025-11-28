@@ -1,54 +1,54 @@
 <?php
+// cookies.php - Registro avanzado de consentimiento
 header('Content-Type: application/json; charset=UTF-8');
 
-// 1. Sanitización de entradas
-$choice = isset($_POST['choice']) && in_array($_POST['choice'], ['accept', 'reject']) ? $_POST['choice'] : 'unknown';
-$ts = date('c');
-$ua = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 200); // Limitamos longitud
+// 1. Captura de datos extendida
+$choice = $_POST['choice'] ?? 'unknown';
+$ip_raw = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
-// 2. ANONIMIZACIÓN DE IP (CRÍTICO GDPR)
-$raw_ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-// Si es IPv4, ponemos a 0 el último octeto. Si es IPv6, cortamos.
-$ip = (strpos($raw_ip, '.') !== false) 
-    ? preg_replace('/\.\d+$/', '.0', $raw_ip) 
-    : substr($raw_ip, 0, 16) . '::';
+// Anonimización de IP (Cumplimiento GDPR - Opcional, pero recomendado)
+// Si quieres la IP completa para análisis interno, comenta estas líneas:
 
-$m = isset($_POST['m']) ? substr($_POST['m'], 0, 1000) : '';
+if (strpos($ip_raw, '.') !== false) {
+    $ip = preg_replace('/\.\d+$/', '.0', $ip_raw); // IPv4: 192.168.1.0
+} else {
+    $ip = substr($ip_raw, 0, 16) . '::'; // IPv6
+}
 
-// 3. Gestión de archivo segura
-$dir = __DIR__ . '/data';
-$file = $dir . '/consents.csv';
-$ok = true; 
-$err = '';
+$ip = $ip_raw; // Guardamos IP completa (Bajo tu responsabilidad legal)
+
+$ua = $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown';
+$lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'Unknown';
+$referer = $_SERVER['HTTP_REFERER'] ?? 'Direct';
+$timestamp = date('Y-m-d H:i:s');
+
+// 2. Preparar línea CSV
+// Formato: Fecha, Elección, IP, Navegador, Idioma, Origen
+$data = [
+    $timestamp,
+    $choice,
+    $ip,
+    str_replace([',', '"'], '', $ua), // Limpiar comas para no romper CSV
+    str_replace([',', '"'], '', $lang),
+    str_replace([',', '"'], '', $referer)
+];
+
+$line = implode(',', $data) . "\n";
+
+// 3. Guardar en archivo
+$file = __DIR__ . '/data/consents.csv';
+$dir = dirname($file);
 
 if (!is_dir($dir)) {
-    if (!@mkdir($dir, 0755, true)) { $ok=false; $err='mkdir_failed'; }
+    @mkdir($dir, 0755, true);
 }
 
-// Formato CSV seguro: Timestamp, Choice, AnonIP, UserAgent(sanitizado)
-$line = sprintf("%s,%s,%s,\"%s\"\n", 
-    $ts, 
-    $choice, 
-    $ip, 
-    str_replace('"', '""', $ua) // Escapar comillas en UA
-);
-
-if ($ok) {
-    if (@file_put_contents($file, $line, FILE_APPEND | LOCK_EX) === false) { 
-        $ok=false; $err='write_failed'; 
-    }
+// Intentar escribir (Append)
+if (@file_put_contents($file, $line, FILE_APPEND | LOCK_EX) !== false) {
+    http_response_code(200);
+    echo json_encode(['status' => 'success']);
+} else {
+    http_response_code(500);
+    echo json_encode(['status' => 'error', 'message' => 'Write failed']);
 }
-
-// 4. Cookie HttpOnly y Secure
-$secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
-setcookie('rf_cookie_consent', $choice, [
-    'expires' => time() + 3600*24*365,
-    'path' => '/',
-    'secure' => $secure,
-    'httponly' => true, // Importante: JS no puede leerla, mejor seguridad
-    'samesite' => 'Lax'
-]);
-
-http_response_code($ok ? 200 : 500);
-echo json_encode(['ok'=>$ok, 'err'=>$err]);
 ?>
