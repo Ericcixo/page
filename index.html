@@ -31,21 +31,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="assets/css/styles.css?v=pro8"/>
+  <link rel="stylesheet" href="assets/css/styles.css?v=pro9"/>
   <link rel="icon" href="img/logo.svg"/>
   <link rel="manifest" href="site.webmanifest">
-
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(reg => console.log('SW registrado ✅', reg.scope))
-          .catch(err => console.log('SW falló ❌', err));
-      });
-    }
-  </script>
-</body>
-</html>
 </head>
 <body>
   
@@ -312,8 +300,17 @@
     </div>
   </div>
 
-  <script src="assets/js/config.js?v=pro8"></script>
-  <script src="assets/js/i18n.js?v=pro8"></script>
-  <script src="assets/js/app.js?v=pro8"></script>
+  <script src="assets/js/config.js?v=pro9"></script>
+  <script src="assets/js/i18n.js?v=pro9"></script>
+  <script src="assets/js/app.js?v=pro9"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('SW registrado ✅', reg.scope))
+          .catch(err => console.log('SW falló ❌', err));
+      });
+    }
+  </script>
 </body>
 </html>
