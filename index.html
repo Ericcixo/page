@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="assets/css/styles.css?v=pro"/>
+  <link rel="stylesheet" href="assets/css/styles.css?v=pro2"/>
   <link rel="icon" href="img/logo.svg"/>
 </head>
 <body>
@@ -234,14 +234,14 @@
   <aside id="cartDrawer" class="drawer">
     <div class="drawer-header">
       <h3>Tu Carrito</h3>
-      <button id="closeCart" class="close-btn">×</button>
+      <button id="closeCart" class="close-btn" aria-label="Cerrar">×</button>
     </div>
     <div class="drawer-body" id="cartLines"></div>
     <div class="drawer-footer">
       <div class="total-row"><span>Total</span> <span id="sumTotal" class="total-amount">0€</span></div>
       <div id="sumSave" class="saving-badge"></div>
       <div class="actions-row">
-        <button id="clearCart" class="btn-ghost">Vaciar</button>
+        <button id="clearCart" class="btn-danger-glass">Vaciar</button>
         <button id="toCheckout" class="btn-glow full">Checkout Seguro →</button>
       </div>
     </div>
@@ -252,13 +252,13 @@
   <div id="cookieBanner" class="cookie-banner glass-panel">
     <div class="cookie-text">Usamos cookies para mejorar tu experiencia.</div>
     <div class="cookie-actions">
-      <button id="cookieReject" class="btn-ghost small">Rechazar</button>
-      <button id="cookieAccept" class="btn-glow small">Aceptar</button>
+      <button id="cookieReject" class="btn-small btn-cookie-reject">Rechazar</button>
+      <button id="cookieAccept" class="btn-small btn-cookie-accept">Aceptar</button>
     </div>
   </div>
 
-  <script src="assets/js/config.js?v=pro"></script>
-  <script src="assets/js/i18n.js?v=pro"></script>
-  <script src="assets/js/app.js?v=pro"></script>
+  <script src="assets/js/config.js?v=pro2"></script>
+  <script src="assets/js/i18n.js?v=pro2"></script>
+  <script src="assets/js/app.js?v=pro2"></script>
 </body>
 </html>
