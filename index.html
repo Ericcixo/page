@@ -170,6 +170,91 @@
       
   </div>
 </section>
+
+<section id="faq" class="section">
+      <h2 class="reveal">Preguntas Frecuentes</h2>
+      <div class="grid">
+        <div class="card reveal" style="grid-column: span 12;">
+          <div class="body">
+            <details style="border-bottom: 1px solid var(--border-color);">
+              <summary>¿Cómo recibo los proveedores o cursos?</summary>
+              <p>El proceso es automático e inmediato. Tras completar el pago seguro, serás redirigido a una página donde podrás descargar todos los archivos PDF al instante.</p>
+            </details>
+            <details style="border-bottom: 1px solid var(--border-color);">
+              <summary>¿Los proveedores son fiables?</summary>
+              <p>Sí, hemos verificado personalmente cada proveedor. Solo listamos aquellos que tienen tiempos de envío rápidos (24-72h) y buena calidad de producto para asegurar tu reputación en Vinted.</p>
+            </details>
+            <details style="border-bottom: 1px solid var(--border-color);">
+              <summary>¿Qué pasa si tengo problemas con la descarga?</summary>
+              <p>No te preocupes. Si cierras la ventana por error, escríbenos a info@revendefacil.com con tu comprobante de pago y te enviaremos los archivos manualmente.</p>
+            </details>
+            <details>
+              <summary>¿Aceptáis devoluciones?</summary>
+              <p>Al tratarse de productos digitales de acceso inmediato, no podemos ofrecer reembolsos una vez que los archivos han sido descargados, salvo error técnico demostrable.</p>
+            </details>
+          </div>
+        </div>
+      </div>
+    </section>
+    ```
+
+### 3. `assets/js/app.js` (Con persistencia de datos)
+Sustituye todo el bloque de la calculadora (desde `// Calculator (pro)` hasta el final del archivo) por este código mejorado que guarda lo que escribes.
+
+```javascript
+  // Calculator (pro) con Persistencia
+  function calcUpdate(){
+    var cP = parseFloat(($('#costProduct')||{}).value)||0; 
+    var cS = parseFloat(($('#costShip')||{}).value)||0; 
+    var pV = parseFloat(($('#priceSell')||{}).value)||0;
+
+    // Guardar en localStorage cada vez que calcula
+    localStorage.setItem('rf_calc', JSON.stringify({cP:cP, cS:cS, pV:pV}));
+
+    var costo = cP + cS; 
+    var margen = pV - costo; 
+    var pct = pV>0 ? (margen/pV)*100 : 0;
+    
+    var fmt=function(n){return n.toFixed(2).replace('.', ',')+'€'};
+    var kC=$('#kCoste'), kB=$('#kBenef'), kM=$('#kMargen'); 
+    
+    if(kC) kC.textContent = fmt(costo); 
+    if(kB) {
+        kB.textContent = fmt(margen);
+        kB.style.color = margen > 0 ? 'var(--accent-success)' : (margen < 0 ? 'var(--accent-danger)' : 'inherit');
+    }
+    if(kM) kM.textContent = (pct.toFixed(1)+'%');
+  }
+
+  var calcBtn = $('#calcBtn'); 
+  if(calcBtn) calcBtn.addEventListener('click', calcUpdate);
+
+  // Restaurar valores guardados al cargar
+  try {
+    var saved = JSON.parse(localStorage.getItem('rf_calc'));
+    if(saved) {
+      if($('#costProduct')) $('#costProduct').value = saved.cP || '';
+      if($('#costShip')) $('#costShip').value = saved.cS || '';
+      if($('#priceSell')) $('#priceSell').value = saved.pV || '';
+    }
+  } catch(e){}
+
+  ['#costProduct','#costShip','#priceSell'].forEach(function(sel){ 
+    var el=$(sel.replace('#','')); 
+    if(el){ el.addEventListener('input', calcUpdate); } 
+  });
+  
+  // Ejecutar cálculo inicial
+  calcUpdate();
+
+  // Footer year
+  var y = new Date().getFullYear(); var yEl = $('#year'); if(yEl) yEl.textContent = y;
+
+  // First bind and paint
+  bindCards();
+  updateUI();
+})();
+    
   </main>
 
   </div>
