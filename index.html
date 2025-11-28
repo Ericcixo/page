@@ -34,6 +34,18 @@
   <link rel="stylesheet" href="assets/css/styles.css?v=pro8"/>
   <link rel="icon" href="img/logo.svg"/>
   <link rel="manifest" href="site.webmanifest">
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('SW registrado ✅', reg.scope))
+          .catch(err => console.log('SW falló ❌', err));
+      });
+    }
+  </script>
+</body>
+</html>
 </head>
 <body>
   
