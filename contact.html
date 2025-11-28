@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5"/>
+  <title>Soporte y Contacto | RevendeFácil</title>
+  <meta name="description" content="Contacta con el equipo de RevendeFácil para dudas sobre proveedores o descargas."/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css?v=pro5"/>
+  <link rel="icon" href="img/logo.svg"/>
+</head>
+<body>
+  
+  <header class="header">
+    <div class="header-inner">
+      <a href="index.html" class="social-link" style="width:auto; height:auto; background:none; border:none; color:white; font-weight:700; text-decoration:none;">← Volver a la Tienda</a>
+      <div class="brand" style="font-family: var(--font-head); font-weight:800; font-size:20px;">RevendeFácil</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section">
+      <div class="reveal" style="text-align:center; max-width:600px; margin:0 auto 40px auto;">
+        <h1 class="h1-premium">Centro de <span class="gradient-text">Soporte</span></h1>
+        <p class="subtitle">¿Tienes problemas con una descarga o dudas antes de comprar? Estamos aquí para ayudarte.</p>
+      </div>
+
+      <div class="glass-panel reveal" style="max-width: 600px; margin: 0 auto;">
+        <form id="contactForm">
+          <div class="form-group">
+            <label for="name">Nombre</label>
+            <input type="text" id="name" class="form-control" placeholder="Tu nombre" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="email">Correo Electrónico</label>
+            <input type="email" id="email" class="form-control" placeholder="ejemplo@correo.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="subject">Asunto</label>
+            <select id="subject" class="form-control">
+              <option value="duda">Duda antes de comprar</option>
+              <option value="descarga">Problema con la descarga</option>
+              <option value="otro">Otro motivo</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="message">Mensaje</label>
+            <textarea id="message" class="form-control" placeholder="Describe tu consulta con detalle..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn-glow full">Enviar Mensaje</button>
+        </form>
+      </div>
+
+      <div class="reveal" style="text-align:center; margin-top: 40px; color: var(--text-muted); font-size: 14px;">
+        <p>También puedes escribirnos directamente a <a href="mailto:info@revendefacil.com" style="color:var(--primary)">info@revendefacil.com</a></p>
+        <p>Tiempo de respuesta medio: 2-4 horas.</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <footer class="footer">
+    <div class="footer-inner container">
+      <div class="brand">RevendeFácil © 2025</div>
+      <div class="links">
+        <a href="terms.html">Términos</a>
+        <a href="privacy.html">Privacidad</a>
+        <a href="index.html">Inicio</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/app.js?v=pro5"></script>
+</body>
+</html>
