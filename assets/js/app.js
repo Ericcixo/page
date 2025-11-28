@@ -1,24 +1,50 @@
 (function(){
   'use strict';
   
-  // --- EFECTO PARALLAX DE FONDO (Mejorado) ---
-  // Mueve los "glows" en dirección opuesta al ratón para dar profundidad
-  document.addEventListener('mousemove', function(e) {
-    const x = e.clientX / window.innerWidth;
-    const y = e.clientY / window.innerHeight;
-    
-    const glow1 = document.querySelector('.glow-1');
-    const glow2 = document.querySelector('.glow-2');
-    const glow3 = document.querySelector('.glow-3');
-    
-    if(glow1) glow1.style.transform = `translate(${x * 30}px, ${y * 30}px)`;
-    if(glow2) glow2.style.transform = `translate(-${x * 40}px, -${y * 40}px)`;
-    if(glow3) glow3.style.transform = `translate(${x * 20}px, -${y * 20}px)`;
+  const CONFIG = window.RF_CONFIG; // Referencia al config maestro
+  if(!CONFIG) console.error("Error Crítico: config.js no cargado");
+
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+  // --- 1. OPTIMIZACIÓN RENDIMIENTO (PARALLAX) ---
+  // Usamos requestAnimationFrame para no saturar la CPU
+  let mouseX = 0, mouseY = 0;
+  let currentX = 0, currentY = 0;
+  
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
   });
 
-  // --- THEME TOGGLE ---
-  const themeBtn = document.getElementById('themeToggle');
-  const themeIcon = document.getElementById('themeIcon');
+  function animateParallax() {
+    // Interpolación lineal (Lerp) para movimiento ultra suave
+    currentX += (mouseX - currentX) * 0.1;
+    currentY += (mouseY - currentY) * 0.1;
+
+    // Actualizar variables CSS para el foco
+    document.body.style.setProperty('--mouse-x', currentX + 'px');
+    document.body.style.setProperty('--mouse-y', currentY + 'px');
+
+    // Mover capas de fondo (Glows)
+    const xPct = currentX / window.innerWidth;
+    const yPct = currentY / window.innerHeight;
+
+    const g1 = $('.glow-1');
+    const g2 = $('.glow-2');
+    const g3 = $('.glow-3');
+
+    if(g1) g1.style.transform = `translate(${xPct * 30}px, ${yPct * 30}px)`;
+    if(g2) g2.style.transform = `translate(-${xPct * 40}px, -${yPct * 40}px)`;
+    if(g3) g3.style.transform = `translate(${xPct * 20}px, -${yPct * 20}px)`;
+
+    requestAnimationFrame(animateParallax);
+  }
+  animateParallax(); // Iniciar loop de animación
+
+  // --- 2. GESTIÓN DEL TEMA (Dark/Light) ---
+  const themeBtn = $('#themeToggle');
+  const themeIcon = $('#themeIcon');
   const html = document.documentElement;
 
   function setTheme(theme) {
@@ -26,186 +52,159 @@
     localStorage.setItem('rf_theme', theme);
     if(themeIcon) themeIcon.textContent = theme === 'dark' ? '🌙' : '☀️';
   }
-
-  const savedTheme = localStorage.getItem('rf_theme') || 'dark';
-  setTheme(savedTheme);
+  // Cargar preferencia guardada
+  setTheme(localStorage.getItem('rf_theme') || 'dark');
 
   if(themeBtn) {
     themeBtn.addEventListener('click', () => {
-      const current = html.getAttribute('data-theme');
-      setTheme(current === 'dark' ? 'light' : 'dark');
+      setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
     });
   }
 
-  // --- CONFIGURACIÓN & ESTADO ---
-  window.RF = window.RF || {};
-  if(!window.CONFIG){ window.CONFIG = { pricing:{ providerUnit:2, bundles:{'4':6}, courseUnit:1, currency:'€' }, paypal:{ currency:'EUR' } }; }
-  
-  const $ = (sel) => document.querySelector(sel);
-  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
-  
-  function getCart(){ try{ return JSON.parse(localStorage.getItem('rf_cart')) || {providers:[], courses:[]}; }catch{ return {providers:[], courses:[]}; } }
-  let cart = getCart();
-  function saveCart(){ localStorage.setItem('rf_cart', JSON.stringify(cart)); updateUI(); }
-  
-  // --- LÓGICA DE PRECIOS ---
+  // --- 3. LÓGICA DEL CARRITO (Centralizada) ---
+  let cart = { providers: [], courses: [] };
+  try {
+    cart = JSON.parse(localStorage.getItem('rf_cart')) || cart;
+  } catch(e) { localStorage.removeItem('rf_cart'); }
+
+  function saveCart(){ 
+    localStorage.setItem('rf_cart', JSON.stringify(cart)); 
+    updateUI(); 
+  }
+
+  // Cálculo de totales usando CONFIG
   function getTotals(){
     const uniqueP = [...new Set(cart.providers)];
     const pCount = uniqueP.length;
-    let pPrice = 0;
-    const unitP = CONFIG.pricing.providerUnit;
-    const bundle4 = CONFIG.pricing.bundles['4'];
     
-    if(pCount < 4) pPrice = pCount * unitP;
-    else pPrice = bundle4 + (pCount - 4) * unitP;
+    // Lógica inteligente desde Config
+    let pPrice = 0;
+    const limit = CONFIG.pricing.bundleThreshold; // 4
+    
+    if(pCount < limit) {
+        pPrice = pCount * CONFIG.pricing.providerUnit;
+    } else {
+        // Precio base del pack + extras unitarios
+        pPrice = CONFIG.pricing.bundlePrice + ((pCount - limit) * CONFIG.pricing.providerUnit);
+    }
     
     let cPrice = 0;
-    cart.courses.forEach(c => cPrice += (c.qty||1) * CONFIG.pricing.courseUnit);
+    cart.courses.forEach(c => cPrice += CONFIG.pricing.courseUnit);
     
-    const pNom = pCount * unitP;
-    const saved = Math.max(0, pNom - pPrice);
-    return { pCount, pPrice, cPrice, saved, total: pPrice + cPrice };
+    const pNominal = pCount * CONFIG.pricing.providerUnit;
+    const saved = Math.max(0, pNominal - pPrice);
+    
+    return { 
+      total: pPrice + cPrice, 
+      saved: saved, 
+      count: pCount + cart.courses.length 
+    };
   }
-  
-  function formatMoney(n){ return n.toFixed(2).replace('.', ',') + '€'; }
 
-  // --- UI UPDATES ---
+  function formatMoney(n){ return n.toFixed(2).replace('.', ',') + CONFIG.pricing.currency; }
+
   function updateUI(){
     const t = getTotals();
-    const count = t.pCount + cart.courses.length;
     
+    // Badges
     const badge = $('#cartCount');
     if(badge){
-      badge.textContent = count;
-      if(count > 0) badge.classList.add('pop'); 
-      setTimeout(()=>badge.classList.remove('pop'), 300);
+      badge.textContent = t.count;
+      if(t.count > 0) { badge.classList.remove('pop'); void badge.offsetWidth; badge.classList.add('pop'); }
     }
 
+    // Drawer Footer
     const sumTotal = $('#sumTotal');
     const sumSave = $('#sumSave');
     if(sumTotal) sumTotal.textContent = formatMoney(t.total);
-    if(sumSave) sumSave.innerHTML = t.saved > 0 ? `🎉 Ahorras <span style="color:#4ade80">${formatMoney(t.saved)}</span>` : '';
+    if(sumSave) sumSave.innerHTML = t.saved > 0 ? `🎉 Ahorras <span style="color:var(--accent-success)">${formatMoney(t.saved)}</span>` : '';
     
-    renderDrawerLines();
+    renderCartItems();
   }
 
-  function renderDrawerLines(){
+  function renderCartItems(){
     const box = $('#cartLines');
     if(!box) return;
     
-    if(cart.providers.length === 0 && cart.courses.length === 0){
+    const allItems = [
+      ...[...new Set(cart.providers)].map(id => ({id, ...CONFIG.products[id]})),
+      ...cart.courses.map(c => ({id: c.id, ...CONFIG.products[c.id]}))
+    ];
+
+    if(allItems.length === 0){
       box.innerHTML = '<div style="text-align:center; padding:60px 20px; opacity:0.5; display:flex; flex-direction:column; align-items:center; gap:16px"><div style="font-size:40px;">🛒</div><div>Tu carrito está vacío</div></div>';
       return;
     }
 
-    let html = '';
-    const pNames = {p1:'Zapatillas', p2:'Vapers', p3:'Relojes', p4:'Colonias'};
-    [...new Set(cart.providers)].forEach(id => {
-      html += `<div class="line" style="display:flex; justify-content:space-between; margin-bottom:16px; border-bottom:1px dashed var(--border-light); padding-bottom:12px;">
+    box.innerHTML = allItems.map(item => `
+      <div class="line" style="display:flex; justify-content:space-between; margin-bottom:16px; border-bottom:1px dashed var(--border-light); padding-bottom:12px;">
         <div style="display:flex; gap:12px; align-items:center;">
-           <div style="background:rgba(59,130,246,0.1); width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px;">📦</div>
-           <div><div style="font-weight:600; font-size:15px;">${pNames[id] || 'Proveedor'}</div><div style="font-size:12px; opacity:0.7">Verificado</div></div>
+           <div style="background:rgba(59,130,246,0.1); width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px;">${item.icon||'📦'}</div>
+           <div>
+             <div style="font-weight:600; font-size:15px;">${item.name || 'Producto Desconocido'}</div>
+             <div style="font-size:12px; opacity:0.7">${item.type === 'provider' ? 'Verificado' : 'Digital'}</div>
+           </div>
         </div>
-        <button class="btn-ghost" style="padding:8px; color:var(--danger)" onclick="window.RF.rmP('${id}')">✕</button>
-      </div>`;
-    });
-
-    const cNames = {c1:'Curso Lujo', c2:'Curso Seguridad', c3:'Curso Anuncios'};
-    cart.courses.forEach(c => {
-      html += `<div class="line" style="display:flex; justify-content:space-between; margin-bottom:16px; border-bottom:1px dashed var(--border-light); padding-bottom:12px;">
-        <div style="display:flex; gap:12px; align-items:center;">
-           <div style="background:rgba(139,92,246,0.1); width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px;">📚</div>
-           <div><div style="font-weight:600; font-size:15px;">${cNames[c.id] || 'Guía PDF'}</div><div style="font-size:12px; opacity:0.7">Digital</div></div>
-        </div>
-        <button class="btn-ghost" style="padding:8px; color:var(--danger)" onclick="window.RF.rmC('${c.id}')">✕</button>
-      </div>`;
-    });
+        <button class="btn-ghost" style="padding:8px; color:var(--danger)" data-remove="${item.id}" aria-label="Eliminar">✕</button>
+      </div>
+    `).join('');
     
+    // Cross-selling inteligente
     if(cart.providers.length > 0 && cart.courses.length === 0){
-       html += `<div style="margin-top:24px; background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.2); border-radius:12px; padding:16px;">
-         <div style="font-size:13px; margin-bottom:12px; opacity:0.8; line-height:1.4">💡 <strong>Consejo Pro:</strong> Protege tu cuenta con el Curso de Seguridad.</div>
-         <button class="btn-glow" style="padding:10px; font-size:13px; min-height:auto" onclick="window.RF.addC('c2')">Añadir (+1€)</button>
+       box.innerHTML += `<div style="margin-top:24px; background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.2); border-radius:12px; padding:16px;">
+         <div style="font-size:13px; margin-bottom:12px; opacity:0.9; line-height:1.4">💡 <strong>Consejo Pro:</strong> Protege tu cuenta con el Curso de Seguridad.</div>
+         <button class="btn-glow" style="padding:10px; font-size:13px; min-height:auto; width:100%" onclick="window.RF.addC('c2')">Añadir (+1€)</button>
        </div>`;
     }
-    box.innerHTML = html;
   }
 
-  // --- ACCIONES GLOBALES ---
-  window.RF.addP = (id) => { if(cart.providers.includes(id)) return toast('Ya tienes este proveedor', 'error'); cart.providers.push(id); saveCart(); toast('Proveedor añadido'); openDrawer(); };
-  window.RF.rmP = (id) => { cart.providers = cart.providers.filter(x => x!==id); saveCart(); };
-  window.RF.addC = (id) => { if(cart.courses.find(x => x.id === id)) return toast('Ya tienes este curso', 'error'); cart.courses.push({id, qty:1}); saveCart(); toast('Curso añadido'); openDrawer(); };
-  window.RF.rmC = (id) => { cart.courses = cart.courses.filter(x => x.id!==id); saveCart(); };
+  // --- 4. INTERACCIONES ---
+  // Exponemos funciones globales para los onclick del HTML
+  window.RF = {
+    addP: (id) => { if(cart.providers.includes(id)) return toast('Ya tienes este proveedor', 'error'); cart.providers.push(id); saveCart(); toast('Proveedor añadido'); openDrawer(); },
+    rmP: (id) => { cart.providers = cart.providers.filter(x => x!==id); saveCart(); },
+    addC: (id) => { if(cart.courses.find(x => x.id === id)) return toast('Ya tienes este curso', 'error'); cart.courses.push({id, qty:1}); saveCart(); toast('Curso añadido'); openDrawer(); },
+    rmC: (id) => { cart.courses = cart.courses.filter(x => x.id!==id); saveCart(); }
+  };
 
-  function toast(msg, type='success'){
-    const t = $('#toast');
-    t.innerHTML = `<div style="background:${type==='error'?'rgba(127,29,29,0.9)':'rgba(6,78,59,0.9)'}; backdrop-filter:blur(10px); color:${type==='error'?'#fca5a5':'#a7f3d0'}; padding:12px 24px; border-radius:99px; box-shadow:0 10px 40px rgba(0,0,0,0.6); border:1px solid var(--border-light); font-weight:600; font-size:14px;">${msg}</div>`;
-    t.style.display = 'block'; t.style.animation = 'fadeUp 0.3s forwards';
-    setTimeout(() => { t.style.display='none'; }, 3000);
-  }
+  // Delegación de eventos (Mejor rendimiento que muchos listeners)
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if(!btn) return;
 
-  // --- DRAWER ---
+    // Botones de añadir
+    if(btn.dataset.type === 'provider') window.RF.addP(btn.dataset.id);
+    if(btn.dataset.type === 'course') window.RF.addC(btn.dataset.id);
+    
+    // Botones de eliminar en el carrito
+    if(btn.dataset.remove) {
+       const id = btn.dataset.remove;
+       if(CONFIG.products[id].type === 'provider') window.RF.rmP(id);
+       else window.RF.rmC(id);
+    }
+  });
+
+  // Drawer Logic
   const overlay = $('#cartOverlay');
-  function openDrawer(){ 
-    document.body.classList.add('cart-open'); 
-    overlay.style.display='block'; 
-    // Pequeño retardo para permitir la transición CSS
-    requestAnimationFrame(() => overlay.style.opacity = '1');
-  }
-  function closeDrawer(){ 
-    document.body.classList.remove('cart-open'); 
-    overlay.style.opacity = '0'; 
-    setTimeout(()=> overlay.style.display='none', 400); 
-  }
+  function openDrawer(){ document.body.classList.add('cart-open'); overlay.style.display='block'; requestAnimationFrame(()=>overlay.style.opacity='1'); }
+  function closeDrawer(){ document.body.classList.remove('cart-open'); overlay.style.opacity='0'; setTimeout(()=>overlay.style.display='none', 400); }
   
   if($('#openCart')) $('#openCart').addEventListener('click', openDrawer);
   if($('#closeCart')) $('#closeCart').addEventListener('click', closeDrawer);
   if(overlay) overlay.addEventListener('click', closeDrawer);
   if($('#clearCart')) $('#clearCart').addEventListener('click', () => { cart={providers:[],courses:[]}; saveCart(); });
-  if($('#toCheckout')) $('#toCheckout').addEventListener('click', () => window.location.href='checkout.html');
+  if($('#toCheckout')) $('#toCheckout').addEventListener('click', () => window.location.href='checkout');
 
-  // --- CONTACT FORM ---
-  const contactForm = $('#contactForm');
-  if(contactForm){
-    contactForm.addEventListener('submit', function(e){
-        e.preventDefault();
-        const btn = contactForm.querySelector('button');
-        const originalText = btn.textContent;
-        btn.textContent = 'Enviando...';
-        btn.disabled = true;
-        setTimeout(() => {
-            btn.textContent = '¡Enviado!';
-            btn.style.background = 'var(--accent-success)';
-            toast('Mensaje recibido. Te responderemos pronto.');
-            contactForm.reset();
-            setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 3000);
-        }, 1500);
-    });
+  // Utilidad Toast
+  function toast(msg, type='success'){
+    const t = $('#toast');
+    if(!t) return;
+    t.innerHTML = `<div style="background:var(--bg-card); backdrop-filter:blur(10px); color:${type==='error'?'var(--danger)':'var(--accent-success)'}; padding:12px 24px; border-radius:99px; box-shadow:0 10px 40px rgba(0,0,0,0.5); border:1px solid var(--border-light); font-weight:600;">${msg}</div>`;
+    t.style.display = 'block'; t.style.animation = 'fadeUp 0.3s forwards';
+    setTimeout(() => { t.style.display='none'; }, 3000);
   }
 
-  // --- COOKIES ---
-  (function initCookies(){
-    const banner = $('#cookieBanner');
-    if(!localStorage.getItem('rf_cookie_consent') && banner) banner.style.display = 'flex'; 
-    else if(banner) banner.style.display = 'none';
-
-    function handleConsent(choice) {
-        localStorage.setItem('rf_cookie_consent', choice);
-        if(banner) { banner.style.opacity = '0'; setTimeout(() => banner.style.display = 'none', 500); }
-    }
-    if($('#cookieAccept')) $('#cookieAccept').addEventListener('click', () => handleConsent('accept'));
-    if($('#cookieReject')) $('#cookieReject').addEventListener('click', () => handleConsent('reject'));
-  })();
-
-  document.addEventListener('click', e => {
-    const btn = e.target.closest('button[data-type]');
-    if(!btn) return;
-    const type = btn.dataset.type;
-    const id = btn.dataset.id;
-    if(type === 'provider') window.RF.addP(id);
-    if(type === 'course') window.RF.addC(id);
-  });
-
-  // --- CALCULATOR ---
+  // Calculadora
   function updateCalc(){
     const cost = parseFloat($('#costProduct').value) || 0;
     const ship = parseFloat($('#costShip').value) || 0;
@@ -224,25 +223,26 @@
   }
   
   if($('#calcBtn')){
-    const savedCalc = JSON.parse(localStorage.getItem('rf_calc_state'));
-    if(savedCalc){ $('#costProduct').value = savedCalc.cost || ''; $('#costShip').value = savedCalc.ship || ''; $('#priceSell').value = savedCalc.sell || ''; }
+    const saved = JSON.parse(localStorage.getItem('rf_calc_state'));
+    if(saved){ $('#costProduct').value = saved.cost||''; $('#costShip').value = saved.ship||''; $('#priceSell').value = saved.sell||''; }
     $('#calcBtn').addEventListener('click', updateCalc);
     $$('.calc-grid input').forEach(i => i.addEventListener('input', updateCalc));
     updateCalc();
   }
 
-  const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if(entry.isIntersecting){ entry.target.classList.add('visible'); observer.unobserve(entry.target); } }); }, { threshold: 0.1 });
+  // Animaciones Scroll
+  const observer = new IntersectionObserver((entries) => { entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); observer.unobserve(e.target); } }); }, { threshold: 0.1 });
   $$('.reveal').forEach(el => observer.observe(el));
   
   $$('.stagger-grid').forEach(grid => {
-    const children = Array.from(grid.children);
-    children.forEach((child, index) => {
+    Array.from(grid.children).forEach((child, i) => {
       child.style.opacity = '0'; child.style.transform = 'translateY(20px)';
-      child.style.transition = `all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) ${index * 0.1}s`;
-      const gridObs = new IntersectionObserver((entries) => { if(entries[0].isIntersecting){ child.style.opacity = '1'; child.style.transform = 'translateY(0)'; } }, {threshold:0.1});
-      gridObs.observe(grid);
+      child.style.transition = `all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) ${i * 0.1}s`;
+      const go = new IntersectionObserver((es) => { if(es[0].isIntersecting){ child.style.opacity = '1'; child.style.transform = 'translateY(0)'; } });
+      go.observe(grid);
     });
   });
 
+  // Inicializar UI
   updateUI();
 })();
