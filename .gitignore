@@ -1,0 +1,17 @@
+# --- Archivos de Sistema ---
+.DS_Store
+Thumbs.db
+
+# --- Datos de Usuario (PRIVACIDAD GDPR) ---
+# Ignorar todos los CSV y logs para no filtrar IPs reales
+data/*.csv
+data/*.log
+data/*.txt
+
+# --- Logs de error PHP ---
+error_log
+*.log
+
+# --- Archivos temporales ---
+*.swp
+*.swo
