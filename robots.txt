@@ -1,3 +1,11 @@
 User-agent: *
 Allow: /
+Disallow: /assets/js/config.js
+Disallow: /downloads/
+Disallow: /data/
+Disallow: /contact.php
+Disallow: /cookies.php
+Disallow: /checkout.html
+Disallow: /gracias.html
+
 Sitemap: https://revendefacil.com/sitemap.xml
