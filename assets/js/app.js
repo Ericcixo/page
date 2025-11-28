@@ -1,15 +1,22 @@
 (function(){
   'use strict';
   
-  // --- EFECTO SPOTLIGHT MOUSE ---
+  // --- EFECTO PARALLAX DE FONDO (Mejorado) ---
+  // Mueve los "glows" en dirección opuesta al ratón para dar profundidad
   document.addEventListener('mousemove', function(e) {
-    const x = e.clientX;
-    const y = e.clientY;
-    document.body.style.setProperty('--mouse-x', x + 'px');
-    document.body.style.setProperty('--mouse-y', y + 'px');
+    const x = e.clientX / window.innerWidth;
+    const y = e.clientY / window.innerHeight;
+    
+    const glow1 = document.querySelector('.glow-1');
+    const glow2 = document.querySelector('.glow-2');
+    const glow3 = document.querySelector('.glow-3');
+    
+    if(glow1) glow1.style.transform = `translate(${x * 30}px, ${y * 30}px)`;
+    if(glow2) glow2.style.transform = `translate(-${x * 40}px, -${y * 40}px)`;
+    if(glow3) glow3.style.transform = `translate(${x * 20}px, -${y * 20}px)`;
   });
 
-  // --- THEME TOGGLE LOGIC (NUEVO) ---
+  // --- THEME TOGGLE ---
   const themeBtn = document.getElementById('themeToggle');
   const themeIcon = document.getElementById('themeIcon');
   const html = document.documentElement;
@@ -20,7 +27,6 @@
     if(themeIcon) themeIcon.textContent = theme === 'dark' ? '🌙' : '☀️';
   }
 
-  // Cargar tema guardado
   const savedTheme = localStorage.getItem('rf_theme') || 'dark';
   setTheme(savedTheme);
 
@@ -139,8 +145,17 @@
 
   // --- DRAWER ---
   const overlay = $('#cartOverlay');
-  function openDrawer(){ document.body.classList.add('cart-open'); overlay.style.display='block'; setTimeout(() => overlay.style.opacity = '1', 10); }
-  function closeDrawer(){ document.body.classList.remove('cart-open'); overlay.style.opacity = '0'; setTimeout(()=> overlay.style.display='none', 300); }
+  function openDrawer(){ 
+    document.body.classList.add('cart-open'); 
+    overlay.style.display='block'; 
+    // Pequeño retardo para permitir la transición CSS
+    requestAnimationFrame(() => overlay.style.opacity = '1');
+  }
+  function closeDrawer(){ 
+    document.body.classList.remove('cart-open'); 
+    overlay.style.opacity = '0'; 
+    setTimeout(()=> overlay.style.display='none', 400); 
+  }
   
   if($('#openCart')) $('#openCart').addEventListener('click', openDrawer);
   if($('#closeCart')) $('#closeCart').addEventListener('click', closeDrawer);
