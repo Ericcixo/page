@@ -1,100 +1,89 @@
 <!doctype html>
 <html lang="es" data-theme="dark">
 <head>
-  <meta name="x-build" content="v22.7 2025-10-08 19:57:46"/>
-  <meta name="x-build" content="v22.6 2025-10-08 19:50:47"/>
-  <meta name="x-build" content="v22.5 2025-10-08 19:48:10"/>
-  <meta name="x-build" content="v22.4 2025-10-08 19:33:38"/>
-  <meta name="x-build" content="v22.3 2025-10-08 19:30:01"/>
-  <meta name="x-build" content="v22.2 2025-10-08 19:13:52"/>
-  <meta name="x-build" content="v22.1 2025-10-08 19:11:35"/>
-  <meta name="x-build" content="v22 2025-10-08 19:02:42"/>
-  <meta name="x-build" content="v21 2025-10-08 18:57:26"/>
-  <meta name="x-build" content="v20 2025-10-08 17:03:50"/>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Checkout — RevendeFácil         </title>
-  <link rel="stylesheet" href="assets/css/styles.css?v=v20"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5"/>
+  <title>Finalizar Compra | RevendeFácil</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css?v=pro6"/>
   <link rel="icon" href="img/logo.svg"/>
 </head>
 <body>
+  
+  <div class="ambient-glows">
+    <div class="glow glow-1"></div>
+    <div class="glow glow-3"></div>
+  </div>
+
   <header class="header">
     <div class="header-inner">
-      <div class="social-group">
-        <a class="btn" href="https://instagram.com/revendefacil" target="_blank" rel="noopener" title="Instagram" aria-label="Instagram"><img src="img/icons/instagram.svg" alt="Instagram" width="18" height="18"></a>
-        <a class="btn" href="https://x.com/revendefacil" target="_blank" rel="noopener" title="X / Twitter" aria-label="X / Twitter"><img src="img/icons/x.svg" alt="X" width="18" height="18"></a>
-        <a class="btn" href="https://www.tiktok.com/@revendefacil" target="_blank" rel="noopener" title="TikTok" aria-label="TikTok"><img src="img/icons/tiktok.svg" alt="TikTok" width="18" height="18"></a>
-        <a class="btn" href="https://www.youtube.com/@revendefacil" target="_blank" rel="noopener" title="YouTube" aria-label="YouTube"><img src="img/icons/youtube.svg" alt="YouTube" width="18" height="18"></a>
-      </div><a class="btn" href="index.html">← Seguir comprando</a>
-    
-      <div class="header-actions">
-
-      </div>
-</div>
-  </header>
-  <main class="container">
-    <h1>Checkout</h1>
-    <div class="grid">
-      <div class="card" style="grid-column: span 8;">
-        <div class="body">
-          <h3>Resumen de compra</h3>
-          <div id="summary"></div>
-        </div>
-      </div>
-      <div class="card" style="grid-column: span 4;">
-        <div class="body">
-          <h3>Pago seguro con PayPal (Sandbox)</h3>
-          <label style="display:flex; gap:8px; align-items:center; margin: 10px 0;">
-            <input type="checkbox" id="acceptTerms"/> <span>Acepto los <a href="terms.html" target="_blank">Términos y Condiciones</a></span>
-          </label>
-          <div id="paypalContainer" style="margin-top: 10px;"></div>
-          <div id="payNotice" class="subtitle" style="color: #94a3b8; margin-top: 8px;">Marca la casilla para habilitar el pago.</div>
-          <div id="errorBox" style="color:#fca5a5; display:none; margin-top:10px;"></div>
-          <div id="ppHelp" class="subtitle" style="display:none; margin-top:8px;">¿No se carga PayPal? Prueba abrir en modo incógnito o desactiva bloqueadores. Si persiste, contáctanos.</div>
-        </div>
-      </div>
+      <a href="index.html" class="social-link" style="width:auto; height:auto; background:none; border:none; color:white; font-weight:700; text-decoration:none;">← Seguir comprando</a>
+      <div class="brand" style="font-family: var(--font-head); font-weight:800; font-size:20px;">RevendeFácil</div>
     </div>
+  </header>
+
+  <main class="container">
+    <section class="section">
+      <h1 class="h1-premium reveal" style="text-align:center">Finalizar <span class="gradient-text">Pedido</span></h1>
+      
+      <div class="grid reveal" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px;">
+        
+        <div class="glass-panel">
+          <h2 style="margin-top:0; font-family: var(--font-head);">Resumen del Carrito</h2>
+          <div id="summary" style="margin-top: 20px;">
+            <p style="color:var(--text-muted)">Cargando tu pedido...</p>
+          </div>
+        </div>
+
+        <div class="glass-panel" style="position:relative; overflow:hidden;">
+          <h2 style="margin-top:0; font-family: var(--font-head);">Pago Seguro</h2>
+          <p style="color:var(--text-muted); font-size:14px; margin-bottom:24px;">Procesado externamente por PayPal (Tarjeta o Saldo).</p>
+          
+          <div style="background:rgba(255,255,255,0.03); border-radius:12px; padding:16px; margin-bottom:24px; border:1px solid var(--border-light);">
+             <label style="display:flex; gap:12px; cursor:pointer; align-items:flex-start;">
+               <input type="checkbox" id="acceptTerms" style="margin-top:4px;">
+               <span style="font-size:13px; color:var(--text-muted); line-height:1.5;">
+                 He leído y acepto los <a href="terms.html" target="_blank" style="color:var(--primary)">Términos y Condiciones</a>. Entiendo que al ser un producto digital no se admiten devoluciones.
+               </span>
+             </label>
+          </div>
+
+          <div id="payNotice" style="text-align:center; color:var(--text-muted); margin-bottom:16px; font-size:14px;">
+            Marca la casilla para continuar
+          </div>
+
+          <div id="paypalContainer"></div>
+          
+          <div id="errorBox" style="display:none; margin-top:16px; padding:12px; background:rgba(239,68,68,0.2); border:1px solid #ef4444; color:#fca5a5; border-radius:8px; font-size:13px; text-align:center;"></div>
+        </div>
+      
+      </div>
+    </section>
   </main>
 
-  <script src="assets/js/config.js?v=v20"></script>
-  <script>
-    (function(){
-      var s = document.createElement('script');
-      var clientId = (window.CONFIG&&CONFIG.paypal&&CONFIG.paypal.clientId) || '9YZXF5328FBRG';
-      var currency = (window.CONFIG&&CONFIG.paypal&&CONFIG.paypal.currency) || 'EUR';
-      s.src = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(clientId) + '&components=buttons&enable-funding=paypal&disable-funding=venmo&commit=true&intent=capture&locale=es_ES&currency=' + encodeURIComponent(currency);
-      s.setAttribute('data-namespace','pp');
-      s.onload = function(){ window.__paypalReady = true; };
-      s.onerror = function(){ var eb=document.getElementById('errorBox'); if(eb){ eb.style.display='block'; eb.textContent='No se pudo cargar PayPal. Recarga o prueba en incógnito.';} var hp=document.getElementById('ppHelp'); if(hp){ hp.style.display='block'; } };
-      if(!window.__ppLoading){ window.__ppLoading = true; document.head.appendChild(s); }
-    })();
-  </script>
-  <script src="assets/js/checkout.js?v=v20"></script>
-
-  <script id="pp-retry">(function(){var tries=0;var iv=setInterval(function(){tries++; if(window.__paypalReady&&window.paypal&&paypal.Buttons){clearInterval(iv);} if(tries>30&&!window.__paypalReady){var eb=document.getElementById("errorBox"); if(eb){eb.style.display="block"; eb.textContent="No se pudo inicializar PayPal. Reintenta o contacta soporte.";} var hp=document.getElementById("ppHelp"); if(hp){hp.style.display="block";} clearInterval(iv);} }, 300);})();</script>
-
-  <div id="cookieBanner" class="cookie-banner" style="position:fixed;left:16px;right:16px;bottom:16px;z-index:100;background:#0f172a;color:#e2e8f0;border:1px solid rgba(148,163,184,.25);border-radius:12px;padding:14px 16px;display:none">
-    <div><strong>Cookies</strong> — Usamos cookies esenciales y anónimas para métricas. Tu elección quedará almacenada en el servidor.</div>
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <button id="cookieAccept" class="btn primary">Aceptar</button>
-      <button id="cookieReject" class="btn">Rechazar</button>
-      <a href="terms.html" class="btn">Más info</a>
+  <footer class="footer">
+    <div class="footer-inner container">
+      <div class="brand">RevendeFácil © 2025</div>
+      <div class="links">
+        <a href="terms.html">Términos</a>
+        <a href="privacy.html">Privacidad</a>
+        <a href="contact.html">Soporte</a>
+      </div>
     </div>
-  </div>
+  </footer>
+
+  <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=EUR"></script>
+  <script src="assets/js/config.js?v=pro6"></script>
+  <script src="assets/js/checkout.js?v=pro6"></script>
+  
   <script>
-    (function(){
-      function st(v){localStorage.setItem('rf_cookies',JSON.stringify(v));}
-      function gt(){try{return JSON.parse(localStorage.getItem('rf_cookies')||'null')}catch(e){return null}}
-      var b=document.getElementById('cookieBanner'); var stt=gt(); var qp=new URLSearchParams(location.search); if((!stt||qp.get('cookies')==='1'||location.hash==='#cookies') && b){ b.style.display='block'; }
-      var m=document.getElementById('cookieManage'); if(m){ m.style.display='inline-block'; m.addEventListener('click', function(){ if(b) b.style.display='block'; }); }
-      function send(choice){
-        var fd=new FormData(); fd.append('choice', choice); fd.append('ts', new Date().toISOString());
-        fetch('cookies.php',{method:'POST',body:fd,credentials:'same-origin'}).catch(function(){}) ;
-      }
-      var a=document.getElementById('cookieAccept'); if(a) a.addEventListener('click', function(){ st({choice:'accept',ts:Date.now()}); send('accept'); b.style.display='none'; });
-      var r=document.getElementById('cookieReject'); if(r) r.addEventListener('click', function(){ st({choice:'reject',ts:Date.now()}); send('reject'); b.style.display='none'; });
-    })();
+    document.addEventListener('mousemove', function(e) {
+      document.body.style.setProperty('--mouse-x', e.clientX + 'px');
+      document.body.style.setProperty('--mouse-y', e.clientY + 'px');
+    });
   </script>
-<button id="cookieManage" class="btn cookie-manage" style="display:none">Cookies</button>
 </body>
 </html>
