@@ -165,28 +165,55 @@
 
   // --- COOKIES (FIXED) ---
   // Esperamos a que el DOM esté listo
-  document.addEventListener('DOMContentLoaded', () => {
+  // --- COOKIES (AVANZADO) ---
+  (function initCookies(){
     const banner = document.getElementById('cookieBanner');
     const acceptBtn = document.getElementById('cookieAccept');
     const rejectBtn = document.getElementById('cookieReject');
 
-    if(!banner || !acceptBtn || !rejectBtn) return; // Si no existen (checkout.html), salimos
+    if (!banner || !acceptBtn || !rejectBtn) return;
 
-    if(!localStorage.getItem('rf_cookie_consent')) {
+    // Comprobar si ya existe decisión
+    const hasConsent = localStorage.getItem('rf_cookie_consent');
+
+    if (!hasConsent) {
+        // Forzar visualización si no hay consentimiento
         banner.style.display = 'flex';
+        // Pequeño delay para asegurar que la opacidad transición funcione si usas fade
+        setTimeout(() => banner.style.opacity = '1', 100);
     } else {
         banner.style.display = 'none';
     }
 
     function handleConsent(choice) {
+        // 1. Guardar en navegador
         localStorage.setItem('rf_cookie_consent', choice);
+        
+        // 2. Ocultar banner
         banner.style.opacity = '0';
         setTimeout(() => banner.style.display = 'none', 500);
+
+        // 3. Enviar datos al servidor (cookies.php)
+        const fd = new FormData();
+        fd.append('choice', choice);
+        
+        // Usar navigator.sendBeacon si está disponible (es más fiable al cerrar página)
+        if (navigator.sendBeacon) {
+            const data = new URLSearchParams();
+            data.append('choice', choice);
+            navigator.sendBeacon('cookies.php', data);
+        } else {
+            // Fallback tradicional
+            fetch('cookies.php', {
+                method: 'POST',
+                body: fd
+            }).catch(err => console.error('Error logging consent:', err));
+        }
     }
 
     acceptBtn.addEventListener('click', () => handleConsent('accept'));
     rejectBtn.addEventListener('click', () => handleConsent('reject'));
-  });
+  })();
 
   // --- CALCULATOR ---
   function updateCalc(){
