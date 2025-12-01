@@ -31,12 +31,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="assets/css/styles.css?v=pro9"/>
+  <link rel="stylesheet" href="assets/css/styles.css?v=opt1"/>
   <link rel="icon" href="img/logo.svg"/>
   <link rel="manifest" href="site.webmanifest">
 </head>
 <body>
   
+  <div id="mouse-spotlight" class="mouse-spotlight"></div>
+
   <div class="ambient-glows">
     <div class="glow glow-1"></div>
     <div class="glow glow-2"></div>
@@ -171,7 +173,6 @@
             <div class="meta">Guía PDF</div>
             <h3 class="title">Curso Lujo</h3>
             <p class="desc">Domina el mercado High-Ticket y evita errores de novato.</p>
-            
             <div style="margin-top:auto">
               <div class="price-tag small" style="margin-bottom:8px">1,00€</div>
               <button class="btn-glow" data-type="course" data-id="c1" aria-label="Añadir curso lujo" style="width:100%; margin-top:0;">Añadir al Carrito</button>
@@ -184,7 +185,6 @@
             <div class="meta">Guía PDF</div>
             <h3 class="title">Seguridad</h3>
             <p class="desc">Método antibaneo y gestión profesional de incidencias.</p>
-            
             <div style="margin-top:auto">
               <div class="price-tag small" style="margin-bottom:8px">1,00€</div>
               <button class="btn-glow" data-type="course" data-id="c2" aria-label="Añadir curso seguridad" style="width:100%; margin-top:0;">Añadir al Carrito</button>
@@ -197,7 +197,6 @@
             <div class="meta">Guía PDF</div>
             <h3 class="title">Anuncios</h3>
             <p class="desc">Copywriting persuasivo y trucos de fotografía viral.</p>
-            
             <div style="margin-top:auto">
               <div class="price-tag small" style="margin-bottom:8px">1,00€</div>
               <button class="btn-glow" data-type="course" data-id="c3" aria-label="Añadir curso anuncios" style="width:100%; margin-top:0;">Añadir al Carrito</button>
@@ -300,9 +299,9 @@
     </div>
   </div>
 
-  <script src="assets/js/config.js?v=pro9"></script>
-  <script src="assets/js/i18n.js?v=pro9"></script>
-  <script src="assets/js/app.js?v=pro9"></script>
+  <script src="assets/js/config.js?v=opt1"></script>
+  <script src="assets/js/i18n.js?v=opt1"></script>
+  <script src="assets/js/app.js?v=opt1"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
