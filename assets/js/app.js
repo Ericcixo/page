@@ -140,6 +140,25 @@
   if($('#clearCart')) $('#clearCart').addEventListener('click', () => { cart={providers:[],courses:[]}; saveCart(); });
   if($('#toCheckout')) $('#toCheckout').addEventListener('click', () => window.location.href='checkout.html');
 
+  // --- CONTACTO ---
+  const contactForm = $('#contactForm');
+  if(contactForm){
+    contactForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        const btn = contactForm.querySelector('button');
+        const originalText = btn.textContent;
+        btn.textContent = 'Enviando...';
+        btn.disabled = true;
+        setTimeout(() => {
+            btn.textContent = '¡Enviado!';
+            btn.style.background = 'var(--accent)';
+            toast('Mensaje recibido.');
+            contactForm.reset();
+            setTimeout(() => { btn.textContent = originalText; btn.disabled = false; btn.style.background=''; }, 3000);
+        }, 1500);
+    });
+  }
+
   // --- COOKIES ---
   document.addEventListener('DOMContentLoaded', () => {
     const banner = $('#cookieBanner');
@@ -162,25 +181,6 @@
     if(acceptBtn) acceptBtn.addEventListener('click', () => handleConsent('accept'));
     if(rejectBtn) rejectBtn.addEventListener('click', () => handleConsent('reject'));
   });
-
-  // --- CONTACTO ---
-  const contactForm = $('#contactForm');
-  if(contactForm){
-    contactForm.addEventListener('submit', function(e){
-        e.preventDefault();
-        const btn = contactForm.querySelector('button');
-        const originalText = btn.textContent;
-        btn.textContent = 'Enviando...';
-        btn.disabled = true;
-        setTimeout(() => {
-            btn.textContent = '¡Enviado!';
-            btn.style.background = 'var(--accent)';
-            toast('Mensaje recibido.');
-            contactForm.reset();
-            setTimeout(() => { btn.textContent = originalText; btn.disabled = false; btn.style.background=''; }, 3000);
-        }, 1500);
-    });
-  }
 
   document.addEventListener('click', e => {
     const btn = e.target.closest('button[data-type]');
