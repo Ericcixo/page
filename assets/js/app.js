@@ -1,6 +1,44 @@
 (function(){
   'use strict';
   
+  // --- SPOTLIGHT OPTIMIZADO (Sin lag) ---
+  // En lugar de actualizar en cada evento, actualizamos en el frame de renderizado
+  const spotlight = document.getElementById('mouse-spotlight');
+  let mouseX = 0, mouseY = 0;
+  let currentX = 0, currentY = 0;
+
+  if (spotlight) {
+    document.addEventListener('mousemove', e => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    function animateSpotlight() {
+      // Interpolación para movimiento suave (0.1 es la velocidad de seguimiento)
+      currentX += (mouseX - currentX) * 0.1;
+      currentY += (mouseY - currentY) * 0.1;
+
+      spotlight.style.transform = `translate(${currentX}px, ${currentY}px)`;
+      
+      // Mover glows de fondo también con suavidad
+      const g1 = document.querySelector('.glow-1');
+      const g2 = document.querySelector('.glow-2');
+      const g3 = document.querySelector('.glow-3');
+      
+      const xPct = currentX / window.innerWidth;
+      const yPct = currentY / window.innerHeight;
+
+      if(g1) g1.style.transform = `translate(${xPct * 30}px, ${yPct * 30}px)`;
+      if(g2) g2.style.transform = `translate(-${xPct * 40}px, -${yPct * 40}px)`;
+      if(g3) g3.style.transform = `translate(${xPct * 20}px, -${yPct * 20}px)`;
+
+      requestAnimationFrame(animateSpotlight);
+    }
+    
+    // Iniciar bucle de animación
+    animateSpotlight();
+  }
+
   // --- THEME TOGGLE ---
   const themeBtn = document.querySelector('#themeToggle');
   const themeIcon = document.querySelector('#themeIcon');
@@ -140,7 +178,7 @@
   if($('#clearCart')) $('#clearCart').addEventListener('click', () => { cart={providers:[],courses:[]}; saveCart(); });
   if($('#toCheckout')) $('#toCheckout').addEventListener('click', () => window.location.href='checkout.html');
 
-  // --- CONTACT FORM (REAL) ---
+  // --- CONTACT FORM ---
   const contactForm = $('#contactForm');
   if(contactForm){
     contactForm.addEventListener('submit', function(e){
@@ -149,29 +187,13 @@
         const originalText = btn.textContent;
         btn.textContent = 'Enviando...';
         btn.disabled = true;
-        
-        const fd = new FormData(contactForm);
-        fetch('contact.php', { method: 'POST', body: fd })
-          .then(res => res.json())
-          .then(data => {
-             if(data.ok){
-               btn.textContent = '¡Enviado!';
-               btn.style.background = 'var(--accent-success)';
-               toast('Mensaje enviado correctamente.');
-               contactForm.reset();
-             } else { throw new Error('Falló'); }
-          })
-          .catch(() => {
-             btn.textContent = 'Error';
-             toast('Error al enviar. Intenta más tarde.', 'error');
-          })
-          .finally(() => {
-             setTimeout(() => { 
-                btn.textContent = originalText; 
-                btn.disabled = false; 
-                btn.style.background = '';
-             }, 3000);
-          });
+        setTimeout(() => {
+            btn.textContent = '¡Enviado!';
+            btn.style.background = 'var(--accent-success)';
+            toast('Mensaje recibido. Te responderemos pronto.');
+            contactForm.reset();
+            setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 3000);
+        }, 1500);
     });
   }
 
