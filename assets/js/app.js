@@ -1,44 +1,6 @@
 (function(){
   'use strict';
   
-  // --- SPOTLIGHT OPTIMIZADO (Sin lag) ---
-  // En lugar de actualizar en cada evento, actualizamos en el frame de renderizado
-  const spotlight = document.getElementById('mouse-spotlight');
-  let mouseX = 0, mouseY = 0;
-  let currentX = 0, currentY = 0;
-
-  if (spotlight) {
-    document.addEventListener('mousemove', e => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-    });
-
-    function animateSpotlight() {
-      // Interpolación para movimiento suave (0.1 es la velocidad de seguimiento)
-      currentX += (mouseX - currentX) * 0.1;
-      currentY += (mouseY - currentY) * 0.1;
-
-      spotlight.style.transform = `translate(${currentX}px, ${currentY}px)`;
-      
-      // Mover glows de fondo también con suavidad
-      const g1 = document.querySelector('.glow-1');
-      const g2 = document.querySelector('.glow-2');
-      const g3 = document.querySelector('.glow-3');
-      
-      const xPct = currentX / window.innerWidth;
-      const yPct = currentY / window.innerHeight;
-
-      if(g1) g1.style.transform = `translate(${xPct * 30}px, ${yPct * 30}px)`;
-      if(g2) g2.style.transform = `translate(-${xPct * 40}px, -${yPct * 40}px)`;
-      if(g3) g3.style.transform = `translate(${xPct * 20}px, -${yPct * 20}px)`;
-
-      requestAnimationFrame(animateSpotlight);
-    }
-    
-    // Iniciar bucle de animación
-    animateSpotlight();
-  }
-
   // --- THEME TOGGLE ---
   const themeBtn = document.querySelector('#themeToggle');
   const themeIcon = document.querySelector('#themeIcon');
@@ -59,7 +21,7 @@
     });
   }
 
-  // --- CONFIGURACIÓN & ESTADO ---
+  // --- CONFIG ---
   window.RF = window.RF || {};
   if(!window.CONFIG){ window.CONFIG = { pricing:{ providerUnit:2, bundles:{'4':6}, courseUnit:1, currency:'€' }, paypal:{ currency:'EUR' } }; }
   
@@ -70,7 +32,7 @@
   let cart = getCart();
   function saveCart(){ localStorage.setItem('rf_cart', JSON.stringify(cart)); updateUI(); }
   
-  // --- LÓGICA DE PRECIOS ---
+  // --- TOTALS ---
   function getTotals(){
     const uniqueP = [...new Set(cart.providers)];
     const pCount = uniqueP.length;
@@ -91,7 +53,7 @@
   
   function formatMoney(n){ return n.toFixed(2).replace('.', ',') + '€'; }
 
-  // --- UI UPDATES ---
+  // --- UI ---
   function updateUI(){
     const t = getTotals();
     const count = t.pCount + cart.courses.length;
@@ -151,7 +113,7 @@
     box.innerHTML = html;
   }
 
-  // --- ACCIONES GLOBALES ---
+  // --- ACTIONS ---
   window.RF = {
     addP: (id) => { if(cart.providers.includes(id)) return toast('Ya tienes este proveedor', 'error'); cart.providers.push(id); saveCart(); toast('Proveedor añadido'); openDrawer(); },
     rmP: (id) => { cart.providers = cart.providers.filter(x => x!==id); saveCart(); },
@@ -178,25 +140,6 @@
   if($('#clearCart')) $('#clearCart').addEventListener('click', () => { cart={providers:[],courses:[]}; saveCart(); });
   if($('#toCheckout')) $('#toCheckout').addEventListener('click', () => window.location.href='checkout.html');
 
-  // --- CONTACT FORM ---
-  const contactForm = $('#contactForm');
-  if(contactForm){
-    contactForm.addEventListener('submit', function(e){
-        e.preventDefault();
-        const btn = contactForm.querySelector('button');
-        const originalText = btn.textContent;
-        btn.textContent = 'Enviando...';
-        btn.disabled = true;
-        setTimeout(() => {
-            btn.textContent = '¡Enviado!';
-            btn.style.background = 'var(--accent-success)';
-            toast('Mensaje recibido. Te responderemos pronto.');
-            contactForm.reset();
-            setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 3000);
-        }, 1500);
-    });
-  }
-
   // --- COOKIES ---
   document.addEventListener('DOMContentLoaded', () => {
     const banner = $('#cookieBanner');
@@ -220,6 +163,25 @@
     if(rejectBtn) rejectBtn.addEventListener('click', () => handleConsent('reject'));
   });
 
+  // --- CONTACTO ---
+  const contactForm = $('#contactForm');
+  if(contactForm){
+    contactForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        const btn = contactForm.querySelector('button');
+        const originalText = btn.textContent;
+        btn.textContent = 'Enviando...';
+        btn.disabled = true;
+        setTimeout(() => {
+            btn.textContent = '¡Enviado!';
+            btn.style.background = 'var(--accent)';
+            toast('Mensaje recibido.');
+            contactForm.reset();
+            setTimeout(() => { btn.textContent = originalText; btn.disabled = false; btn.style.background=''; }, 3000);
+        }, 1500);
+    });
+  }
+
   document.addEventListener('click', e => {
     const btn = e.target.closest('button[data-type]');
     if(!btn) return;
@@ -229,7 +191,7 @@
     if(type === 'course') window.RF.addC(id);
   });
 
-  // --- CALCULATOR ---
+  // --- CALC ---
   function updateCalc(){
     const cost = parseFloat($('#costProduct').value) || 0;
     const ship = parseFloat($('#costShip').value) || 0;
@@ -243,7 +205,7 @@
     $('#kCoste').textContent = formatMoney(totalCost);
     const kBenef = $('#kBenef');
     kBenef.textContent = formatMoney(profit);
-    kBenef.style.color = profit > 0 ? 'var(--accent-success)' : (profit < 0 ? 'var(--danger)' : 'inherit');
+    kBenef.style.color = profit > 0 ? 'var(--accent)' : (profit < 0 ? 'var(--danger)' : 'inherit');
     $('#kMargen').textContent = margin.toFixed(1) + '%';
   }
   
