@@ -7,16 +7,19 @@
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
   
-  // --- ANIMACIONES REVEAL (Corrección Pantalla Vacía) ---
-  const observer = new IntersectionObserver((entries) => { 
-    entries.forEach(e => { 
-      if(e.isIntersecting){ 
-        e.target.classList.add('visible'); 
-        observer.unobserve(e.target); 
-      } 
-    }); 
-  }, { threshold: 0.1 });
-  $$('.reveal').forEach(el => observer.observe(el));
+  // ANIMACIONES REVEAL (Fix)
+  // Disparar un poco después de carga para asegurar que se ven
+  setTimeout(() => {
+      const observer = new IntersectionObserver((entries) => { 
+        entries.forEach(e => { 
+          if(e.isIntersecting){ 
+            e.target.classList.add('visible'); 
+            observer.unobserve(e.target); 
+          } 
+        }); 
+      }, { threshold: 0.1 });
+      $$('.reveal').forEach(el => observer.observe(el));
+  }, 100);
 
   // Recuperar carrito
   let cart = { providers: [], courses: [] };
@@ -82,7 +85,7 @@
       style: { layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay' },
       
       onInit: function(data, actions) {
-        actions.disable(); // Empezar deshabilitado
+        actions.disable(); 
         checkbox.addEventListener('change', () => {
           checkbox.checked ? actions.enable() : actions.disable();
           notice.style.display = checkbox.checked ? 'none' : 'block';
@@ -116,11 +119,15 @@
     }).render('#paypalContainer');
   }
 
+  // Comprobación eficiente de carga
+  let checks = 0;
   const checkPP = setInterval(() => {
+    checks++;
     if(window.paypal){
       clearInterval(checkPP);
       mountPayPal();
     }
+    if(checks > 50) clearInterval(checkPP); // Parar tras 5s si falla
   }, 100);
 
 })();
